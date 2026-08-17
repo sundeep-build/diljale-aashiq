@@ -1,0 +1,25 @@
+{
+  "name": "Diljale Aashiq — 24×7 dard ka radio",
+  "short_name": "Diljale Aashiq",
+  "description": "Non-stop heartbreak radio. Dard-o-Meter ghumao, Tapri Mode chalao, kisi ke naam ek gaana kar do.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0508",
+  "theme_color": "#0a0508",
+  "lang": "hi-Latn",
+  "dir": "ltr",
+  "categories": ["music", "entertainment", "lifestyle"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Dard-o-Meter", "url": "/#dial" },
+    { "name": "Tapri Mode", "url": "/#tapri" },
+    { "name": "Dedication banao", "url": "/#dedicate" }
+  ]
+}

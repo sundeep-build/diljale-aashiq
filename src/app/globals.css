@@ -1,26 +1,318 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ---- palette: 2 baje raat, neon sign flickering outside ---- */
+  --color-ink: #0a0508;
+  --color-ink-2: #140a11;
+  --color-ink-3: #1e0f18;
+  --color-rose: #ff2f5e;
+  --color-rose-soft: #ff8fa8;
+  --color-amber: #ffbe6b;
+  --color-cream: #f9edf0;
+  --color-muted: #ab8794;
+
+  --font-brush: var(--font-kalam), var(--font-bricolage), cursive;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-deva: var(--font-noto-deva), serif;
+
+  --animate-spin-slow: spin 3.2s linear infinite;
+  --animate-flicker: flicker 4.5s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-marquee: marquee 26s linear infinite;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-drift: drift 12s ease-in-out infinite;
+  --animate-flicker-slow: flicker 7s linear infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ---------------------------------------------------------------- rain --
+   Three things stacked, cheapest first:
+
+   1. `rain` — the distant curtain. One tall element of dashed streaks
+      translated exactly one tile downward and looped, so it runs on the
+      compositor. Animating background-position instead would repaint
+      every frame.
+   2. `rain-fall` — individual foreground drops. Real drops accelerate, so
+      the fall is eased in and the drop stretches as it speeds up: that
+      vertical smear is what a camera records as motion blur, and it is the
+      single biggest tell between "rain" and "diagonal lines".
+   3. `drop-cling` / `drop-trail` / `splash` — the slow-motion beats. A drop
+      on the glass sits, creeps, then lets go and runs, dragging a wet
+      trail behind it; a drop that reaches the street throws a ripple. */
+/* --tile is the streak pattern's period in px, so one cycle lands exactly on
+   the next tile and the loop has no seam. */
+@keyframes rain {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, var(--tile, 72px), 0); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* one drop, top of frame to the wet road. --fade carries the layer's opacity
+   so near drops read solid and far ones stay a hint. */
+@keyframes rain-fall {
+  0% { transform: translate3d(0, -20vh, 0) scaleY(0.5); opacity: 0; }
+  7% { opacity: var(--fade, 0.7); }
+  88% { opacity: var(--fade, 0.7); }
+  100% { transform: translate3d(0, 135vh, 0) scaleY(1.85); opacity: 0; }
+}
+
+/* the hero drop: beads up, hangs on surface tension, breaks away, runs.
+   Percentages are shared with drop-trail below — edit them together. */
+@keyframes drop-cling {
+  0% { transform: translate3d(0, 0, 0) scale(0.4); opacity: 0; }
+  10% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  38% { transform: translate3d(0, 4%, 0) scale(1); }      /* swells, holds */
+  52% { transform: translate3d(0, 9%, 0) scale(0.99); }   /* first slip */
+  60% { transform: translate3d(0, 13%, 0) scale(1); }     /* catches again */
+  86% { transform: translate3d(0, 74%, 0) scale(0.92); }  /* lets go */
+  97% { transform: translate3d(0, 100%, 0) scale(0.86); opacity: 1; }
+  100% { transform: translate3d(0, 100%, 0) scale(0.86); opacity: 0; }
+}
+
+/* the wet streak left on the glass — scaled from the top so its bottom edge
+   tracks the drop exactly (the track is 100% of the trail's own height) */
+@keyframes drop-trail {
+  0%, 10% { transform: scaleY(0); opacity: 0; }
+  20% { opacity: 0.9; }
+  38% { transform: scaleY(0.04); }
+  52% { transform: scaleY(0.09); }
+  60% { transform: scaleY(0.13); }
+  86% { transform: scaleY(0.74); }
+  97% { transform: scaleY(1); opacity: 0.9; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* impact on the road: the ring spreads and flattens as it dies */
+@keyframes splash {
+  0%, 62% { transform: translate3d(0, 0, 0) scale(0.15, 0.4); opacity: 0; }
+  68% { opacity: 0.85; }
+  100% { transform: translate3d(0, 0, 0) scale(1.9, 1); opacity: 0; }
+}
+
+/* the crown — the bit of water that jumps back up out of the puddle */
+@keyframes splash-back {
+  0%, 63% { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+  70% { transform: translate3d(0, -9px, 0) scale(1); opacity: 0.8; }
+  100% { transform: translate3d(0, 2px, 0) scale(0.5); opacity: 0; }
+}
+
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.35; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.08); }
+}
+
+@layer base {
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--color-ink);
+    /* keep content clear of the sticky player on mobile */
+    scroll-padding-bottom: 7rem;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-rose);
+    color: #fff;
+  }
+
+  /* thin, on-theme scrollbars */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-rose) 35%, transparent);
+    border-radius: 999px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* frosted card used across every section */
+  .panel {
+    background: linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--color-cream) 7%, transparent),
+      color-mix(in oklab, var(--color-cream) 2%, transparent)
+    );
+    border: 1px solid color-mix(in oklab, var(--color-cream) 10%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .panel-hover {
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .panel-hover:hover {
+    border-color: color-mix(in oklab, var(--color-rose) 45%, transparent);
+    box-shadow: 0 18px 50px -20px color-mix(in oklab, var(--color-rose) 55%, transparent);
+  }
+
+  .neon-text {
+    text-shadow:
+      0 0 12px color-mix(in oklab, var(--color-rose) 65%, transparent),
+      0 0 48px color-mix(in oklab, var(--color-rose) 35%, transparent);
+  }
+
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-rose-soft);
+  }
+
+  /* The one page container. The header, every section, the footer and the
+     sticky player all use this, so nothing can drift out of alignment.
+     Equivalent to `mx-auto w-full max-w-6xl px-4 sm:px-6`. */
+  .page-w {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem;
+    padding-inline: 1rem;
+  }
+  @media (width >= 40rem) {
+    .page-w {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  /* the album-cover wordmark: red top line, white bottom line, dry brush */
+  .brush {
+    font-family: var(--font-brush);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 0.92;
+  }
+
+  /* a joke take on the advisory sticker — our own wording, not the RIAA mark */
+  .advisory {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
+    border: 2px solid var(--color-cream);
+    background: var(--color-ink);
+    color: var(--color-cream);
+    padding: 0.3rem 0.6rem 0.25rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  /* heartbeat rule under the tagline */
+  .pulse-rule {
+    height: 10px;
+    width: 100%;
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: 40px 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='10'%3E%3Cpath d='M0 5h9l2-3 3 6 3-5 2 2h21' fill='none' stroke='%23ff2f5e' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    opacity: 0.75;
+  }
+
+  /* film grain + scanlines, sits above the background art, below content */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: -50%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.22;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .scanlines::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.35;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      rgba(0, 0, 0, 0.35) 2px 3px
+    );
+  }
+
+  /* horizontal chip rows scroll without an ugly bar on desktop */
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* range inputs — one styling pass for every slider on the site */
+  .dial {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-cream) 14%, transparent);
+    outline: none;
+  }
+  /* --dial-thumb lets each fader carry its own colour */
+  .dial::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--dial-thumb, var(--color-rose));
+    border: 3px solid var(--color-ink);
+    box-shadow:
+      0 0 0 1px var(--dial-thumb, var(--color-rose)),
+      0 0 18px var(--dial-thumb, var(--color-rose));
+    cursor: pointer;
+  }
+  .dial::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--dial-thumb, var(--color-rose));
+    border: 3px solid var(--color-ink);
+    box-shadow: 0 0 14px var(--dial-thumb, var(--color-rose));
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html { scroll-behavior: auto; }
 }
