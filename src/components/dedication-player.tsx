@@ -1,6 +1,6 @@
 "use client";
 
-import { useRadio } from "./radio-provider";
+import { useRadio, useRadioProgress } from "./radio-provider";
 import { fmtTime } from "@/lib/utils";
 import { Pause, Play, YouTubeMusic } from "./icons";
 import { PLAYLIST_URL } from "@/data/tracks";
@@ -8,8 +8,8 @@ import { PLAYER_BOX } from "@/lib/youtube-embed";
 
 /** The player that sits under a shared dedication. */
 export function DedicationPlayer({ accent }: { accent: string }) {
-  const { attachHost, toggle, started, isPaused, position, duration, ready, failed, current } =
-    useRadio();
+  const { attachHost, toggle, started, isPaused, ready, failed, current } = useRadio();
+  const { position, duration } = useRadioProgress();
 
   const playing = started && !isPaused;
   const progress = duration > 0 ? Math.min(1, position / duration) : 0;
@@ -44,9 +44,10 @@ export function DedicationPlayer({ accent }: { accent: string }) {
             {playing ? "Baj raha hai" : "Sunne ke liye dabao"}
           </p>
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-cream/12">
+            {/* scaleX rather than width — see the note on the hero scrubber */}
             <div
-              className="h-full rounded-full transition-[width] duration-300"
-              style={{ width: `${progress * 100}%`, background: accent }}
+              className="h-full w-full origin-left rounded-full transition-transform duration-300"
+              style={{ transform: `scaleX(${progress})`, background: accent }}
             />
           </div>
           <div className="mt-1 flex justify-between text-[10px] tabular-nums text-muted">

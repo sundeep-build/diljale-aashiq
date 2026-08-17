@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRadio } from "./radio-provider";
 import { usePresence } from "./use-presence";
 import { useInstall, useServiceWorker } from "./use-install";
-import { BrokenHeart, Download } from "./icons";
+import { setMotion, useMotion } from "./use-motion";
+import { cx } from "@/lib/utils";
+import { BrokenHeart, Download, Rain } from "./icons";
 
 const NAV = [
   { href: "#dial", label: "Dard-o-Meter" },
@@ -19,6 +21,7 @@ export function TopBar() {
   const { started, isPaused } = useRadio();
   const { live } = usePresence();
   const { installed, canInstall, install } = useInstall();
+  const motion = useMotion();
   const [clock, setClock] = useState<string | null>(null);
 
   useServiceWorker();
@@ -42,7 +45,12 @@ export function TopBar() {
   const onAir = started && !isPaused;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-cream/10 bg-ink/70 backdrop-blur-xl">
+    /* The bar is pinned over the rain, so a backdrop blur here is re-computed
+       on every frame of an animation that never ends. It was `backdrop-blur-xl`
+       (24px) over a 70% ink wash; a 90% wash on small screens gets to the same
+       place for free, and the real blur is kept only from `md` up, where the
+       device is likelier to have the headroom for it. */
+    <header className="sticky top-0 z-40 border-b border-cream/10 bg-ink/90 md:bg-ink/70 md:backdrop-blur-md">
       <div className="page-w flex h-14 items-center gap-2 sm:h-16 sm:gap-3">
         <Link href="/" className="group flex shrink-0 items-center gap-2">
           <span className="relative grid size-8 place-items-center">
@@ -94,6 +102,31 @@ export function TopBar() {
             />
             {onAir ? "On Air" : "Off Air"}
           </span>
+
+          {/* The weather is the page's biggest continuous power draw, and no
+              web API reports that a device is running hot — so the switch is
+              the visitor's. Defaults to off for anyone whose OS already asks
+              for reduced motion or data saving. See use-motion.ts. */}
+          <button
+            onClick={() => setMotion(motion === "calm" ? "full" : "calm")}
+            aria-pressed={motion === "calm"}
+            aria-label={
+              motion === "calm" ? "Baarish wapas chalu karo" : "Baarish band karo (battery bachao)"
+            }
+            title={
+              motion === "calm"
+                ? "Baarish band hai — battery bach rahi hai"
+                : "Baarish band karo, battery bachao"
+            }
+            className={cx(
+              "grid size-7 shrink-0 place-items-center rounded-full border transition sm:size-8",
+              motion === "calm"
+                ? "border-cream/12 text-muted hover:text-cream"
+                : "border-rose/40 text-rose-soft hover:border-rose",
+            )}
+          >
+            <Rain className="size-3.5" />
+          </button>
 
           {canInstall && !installed && (
             <button

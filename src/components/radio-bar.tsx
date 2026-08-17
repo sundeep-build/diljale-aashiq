@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRadio } from "./radio-provider";
+import { useRadio, useRadioProgress } from "./radio-provider";
 import { ROTATION_BY_SLUG } from "@/data/rotations";
 import { cx } from "@/lib/utils";
 import { Next, Pause, Play, Prev } from "./icons";
@@ -11,7 +11,8 @@ import { Next, Pause, Play, Prev } from "./icons";
  * transport is always a thumb away on a phone.
  */
 export function RadioBar() {
-  const { current, started, isPaused, position, duration, toggle, next, prev } = useRadio();
+  const { current, started, isPaused, toggle, next, prev } = useRadio();
+  const { position, duration } = useRadioProgress();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -38,9 +39,10 @@ export function RadioBar() {
       <div className="panel relative flex items-center gap-3 overflow-hidden rounded-2xl p-2 pr-3 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.9)]">
         {/* progress hairline across the top */}
         <span className="absolute inset-x-0 top-0 h-0.5 bg-cream/10">
+          {/* scaleX rather than width — see the note on the hero scrubber */}
           <span
-            className="block h-full transition-[width] duration-300"
-            style={{ width: `${progress * 100}%`, background: rot.from }}
+            className="block h-full origin-left transition-transform duration-300"
+            style={{ transform: `scaleX(${progress})`, background: rot.from }}
           />
         </span>
 

@@ -33,7 +33,7 @@ export function TrackList() {
   return (
     <section
       id="songs"
-      className="relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
+      className="lazy-section relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
     >
       <div className="mb-5">
         <p className="section-label">Poori tape · पूरी टेप</p>

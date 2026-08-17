@@ -1,3 +1,5 @@
+import { cx } from "@/lib/utils";
+
 /**
  * The rainy 2am street the whole station sits on — the album cover, rebuilt in
  * CSS and one inline SVG. No image files, so it costs nothing to serve and
@@ -6,6 +8,16 @@
  * Rain is four depth layers of transform/opacity animation rather than a
  * canvas: it composites on the GPU, so it is effectively free on a phone, and
  * `prefers-reduced-motion` stops it dead via the global rule in globals.css.
+ *
+ * Performance rule for everything in this file: an animated element may only
+ * change `transform` and `opacity`, and it must not sit inside a `filter` or
+ * `backdrop-filter`. Both of those force the browser off the compositor and
+ * back into re-rasterising the whole subtree every frame, which is what used
+ * to make this scene lock up a mid-range phone.
+ *
+ * Density scales with the screen. A phone gets the sky, the skyline and one
+ * sheet of rain; the deeper layers are `hidden sm:block` so they cost nothing
+ * at all on small screens — no elements, no animations, no layers.
  */
 export function Backdrop() {
   return (
@@ -13,14 +25,17 @@ export function Backdrop() {
       {/* base wash — colder and darker than before, like the cover */}
       <div className="absolute inset-0 bg-[radial-gradient(120%_85%_at_50%_-10%,#3b1020_0%,#160a10_42%,#070406_100%)]" />
 
-      {/* storm clouds rolling behind the skyline */}
-      <div className="animate-drift absolute -left-40 -top-24 h-[30rem] w-[38rem] rounded-full bg-[#5a1830]/30 blur-[130px]" />
+      {/* Storm clouds rolling behind the skyline. Blur radii are down from
+          130-140px: the blur is rasterised once, but a softer one over this
+          much area is still real memory on a phone, and at this scale the
+          difference is invisible. */}
+      <div className="weather animate-drift absolute -left-40 -top-24 h-[30rem] w-[38rem] rounded-full bg-[#5a1830]/30 blur-[100px]" />
       <div
-        className="animate-drift absolute -right-32 top-4 h-[26rem] w-[34rem] rounded-full bg-[#2a1030]/40 blur-[140px]"
+        className="weather animate-drift absolute -right-32 top-4 h-[26rem] w-[34rem] rounded-full bg-[#2a1030]/40 blur-[100px]"
         style={{ animationDelay: "-5s" }}
       />
       <div
-        className="animate-drift absolute right-10 top-1/3 h-[20rem] w-[20rem] rounded-full bg-amber/12 blur-[120px]"
+        className="weather animate-drift absolute right-10 top-1/3 hidden h-[20rem] w-[20rem] rounded-full bg-amber/12 blur-[90px] sm:block"
         style={{ animationDelay: "-9s" }}
       />
 
@@ -54,16 +69,18 @@ const WIND = 15;
  */
 function Rain() {
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="weather absolute inset-0 overflow-hidden">
       {/* far: a haze of streaks, too small to resolve as individual drops */}
-      <Curtain opacity={0.1} gap={22} len={22} thick={1} speed={112} blur={0.7} />
+      <Curtain opacity={0.09} gap={22} len={22} thick={1} speed={112} className="hidden sm:block" />
       <Curtain opacity={0.14} gap={46} len={34} thick={1} speed={195} />
-      {/* near-ish sheet, blurred because it is past the focal plane */}
-      <Curtain opacity={0.1} gap={92} len={58} thick={2} speed={315} blur={1.4} />
+      {/* near-ish sheet, sparser and softer so it reads as past the focal plane */}
+      <Curtain opacity={0.09} gap={92} len={58} thick={2} speed={315} className="hidden sm:block" />
 
-      <DropField count={14} depth={0} />
-      <DropField count={10} depth={1} />
-      <DropField count={6} depth={2} />
+      {/* Only the nearest drops survive on a phone. Each drop is its own
+          composited layer, so the count is GPU memory as much as it is CPU. */}
+      <DropField count={9} depth={0} className="hidden sm:block" />
+      <DropField count={7} depth={1} className="hidden sm:block" />
+      <DropField count={5} depth={2} />
     </div>
   );
 }
@@ -79,14 +96,14 @@ function Curtain({
   len,
   thick,
   speed,
-  blur,
+  className,
 }: {
   opacity: number;
   gap: number;
   len: number;
   thick: number;
   speed: number; // px per second, straight down
-  blur?: number;
+  className?: string;
 }) {
   const tile = len + Math.round(len * 0.9);
   const fade = "linear-gradient(to bottom, transparent, black 16%, black 74%, transparent)";
@@ -96,13 +113,15 @@ function Curtain({
 
   return (
     <div
-      className="absolute inset-0"
+      className={cx("absolute inset-0", className)}
       style={{ opacity, maskImage: fade, WebkitMaskImage: fade }}
     >
-      <div
-        className="absolute -inset-[40%]"
-        style={{ transform: `rotate(${WIND}deg)`, filter: blur ? `blur(${blur}px)` : undefined }}
-      >
+      {/* The distant sheets used to carry a `filter: blur()` here. A filter on
+          an ancestor pins the animating child to the CPU raster path — the
+          blur has to be recomputed for every frame of the fall — and at 0.7px
+          it was doing that for an effect nobody can see. Depth now comes from
+          opacity and streak spacing alone, which composites. */}
+      <div className="absolute -inset-[40%]" style={{ transform: `rotate(${WIND}deg)` }}>
         <div
           className="h-[200%] w-full"
           style={{
@@ -120,30 +139,41 @@ function Curtain({
   );
 }
 
-/** [drop width px, length px, fall seconds, opacity, blur px] per depth */
-const DEPTHS: [number, number, number, number, number][] = [
-  [1.5, 12, 6.9, 0.35, 0.6],
-  [2, 20, 5.6, 0.55, 0.2],
-  [3, 34, 4.3, 0.8, 0],
+/** [drop width px, length px, fall seconds, opacity] per depth */
+const DEPTHS: [number, number, number, number][] = [
+  [1.5, 12, 6.9, 0.3],
+  [2, 20, 5.6, 0.5],
+  [3, 34, 4.3, 0.8],
 ];
 
 /**
  * Individual drops, the part the curtain cannot fake. Each one accelerates
  * (ease-in, because gravity) and stretches as it goes — a real drop shot at
  * speed smears vertically, and without that they read as sliding sticks.
+ *
+ * The depth-of-field blur that used to wrap this layer is gone for the same
+ * reason as the curtains': a `filter` ancestor makes every frame of every
+ * drop a fresh rasterisation instead of a compositor transform. Distance is
+ * carried by the per-depth opacity instead.
  */
-function DropField({ count, depth }: { count: number; depth: number }) {
-  const [w, len, secs, fade, blur] = DEPTHS[depth];
+function DropField({
+  count,
+  depth,
+  className,
+}: {
+  count: number;
+  depth: number;
+  className?: string;
+}) {
+  const [w, len, secs, fade] = DEPTHS[depth];
   const rand = seeded(depth * 977 + 31);
+  // only the near layer is big enough for the glow to register
+  const near = depth === 2;
 
   return (
     <div
-      className="absolute -inset-[30%]"
-      style={{
-        transform: `rotate(${WIND}deg)`,
-        // depth-of-field blur once for the whole layer rather than per drop
-        filter: blur ? `blur(${blur}px)` : undefined,
-      }}
+      className={cx("absolute -inset-[30%]", className)}
+      style={{ transform: `rotate(${WIND}deg)` }}
     >
       {Array.from({ length: count }, (_, i) => {
         const dur = secs * (0.82 + rand() * 0.36);
@@ -166,9 +196,15 @@ function DropField({ count, depth }: { count: number; depth: number }) {
                 rgba(220,236,255,0.3) 42%,
                 rgba(240,248,255,0.95) 86%,
                 rgba(255,255,255,1) 100%)`,
-              // the drop is a lens: it picks up the neon it falls past
-              boxShadow: `0 0 ${w * 3}px rgba(200,225,255,0.4), 0 ${len * 0.2}px ${w * 4}px rgba(255,47,94,0.18)`,
-              willChange: "transform",
+              // the drop is a lens: it picks up the neon it falls past. Two
+              // blurred shadows on a 1.5px far drop is pure paint cost for
+              // something sub-pixel, so only the near layer carries one.
+              boxShadow: near
+                ? `0 0 ${w * 3}px rgba(200,225,255,0.4), 0 ${len * 0.2}px ${w * 4}px rgba(255,47,94,0.18)`
+                : undefined,
+              // Promotion is not free — it is a GPU texture per drop. Worth it
+              // for the near layer you actually watch, wasteful for the haze.
+              willChange: near ? "transform" : undefined,
             }}
           />
         );
@@ -182,8 +218,8 @@ function Splashes() {
   const rand = seeded(613);
 
   return (
-    <div className="absolute inset-x-0 bottom-0 h-40 overflow-hidden">
-      {Array.from({ length: 7 }, (_, i) => {
+    <div className="weather absolute inset-x-0 bottom-0 h-40 overflow-hidden">
+      {Array.from({ length: 5 }, (_, i) => {
         const dur = 3.4 + rand() * 2.9;
         const size = 16 + rand() * 26;
         const timing = { animationDelay: `-${(rand() * dur).toFixed(2)}s` };
@@ -228,15 +264,19 @@ function Splashes() {
  * (the mover's height *is* the trail's height, so the shared percentages in
  * `drop-cling` and `drop-trail` line up).
  *
- * Desktop only: `backdrop-filter` per drop is the one genuinely expensive
- * thing here, and it is not worth a phone's battery.
+ * Desktop only, and no longer a `backdrop-filter`. A backdrop filter on a
+ * *moving* element is the worst case there is: the compositor has to re-read
+ * the region behind it and re-blur it on every frame, for every drop, and the
+ * region behind it is the rain. At 1.4px the blur was doing almost nothing
+ * visible anyway — the radial highlight and the inset shadows are what make
+ * the bead read as water, and those are a one-time paint.
  */
 function GlassDrops() {
   const rand = seeded(2081);
 
   return (
-    <div className="absolute inset-0 hidden overflow-hidden md:block">
-      {Array.from({ length: 7 }, (_, i) => {
+    <div className="weather absolute inset-0 hidden overflow-hidden md:block">
+      {Array.from({ length: 5 }, (_, i) => {
         const size = 9 + rand() * 13;
         const travel = 26 + rand() * 30; // vh
         const dur = 12 + rand() * 12;
@@ -290,13 +330,13 @@ function GlassDrops() {
                   width: size,
                   height: size * 1.18,
                   borderRadius: "52% 48% 44% 56% / 58% 54% 46% 42%",
+                  // slightly brighter stops than before, to stand in for the
+                  // `brightness(1.12)` the backdrop filter used to contribute
                   background: `radial-gradient(58% 52% at 36% 30%,
-                    rgba(255,255,255,0.75) 0%,
-                    rgba(226,238,255,0.22) 46%,
-                    rgba(150,175,210,0.1) 72%,
-                    rgba(255,255,255,0.06) 100%)`,
-                  backdropFilter: "blur(1.4px) brightness(1.12)",
-                  WebkitBackdropFilter: "blur(1.4px) brightness(1.12)",
+                    rgba(255,255,255,0.82) 0%,
+                    rgba(226,238,255,0.28) 46%,
+                    rgba(150,175,210,0.14) 72%,
+                    rgba(255,255,255,0.08) 100%)`,
                   boxShadow: `inset -1px -2px 4px rgba(255,255,255,0.35),
                     inset 2px 3px 5px rgba(255,47,94,0.16),
                     0 2px 7px rgba(0,0,0,0.4)`,

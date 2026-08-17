@@ -11,7 +11,9 @@ const MARQUEE = [
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-cream/10 bg-ink/60 backdrop-blur-sm">
+    /* `content-visibility` here also parks the marquee: an off-screen ticker
+       was keeping the compositor awake for the whole page. */
+    <footer className="lazy-section relative z-10 border-t border-cream/10 bg-ink/85">
       {/* endless ticker */}
       <div className="overflow-hidden border-b border-cream/10 py-3">
         <div className="animate-marquee flex w-max gap-8 whitespace-nowrap">

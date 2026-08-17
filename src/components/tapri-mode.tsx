@@ -61,14 +61,14 @@ export function TapriMode() {
   return (
     <section
       id="tapri"
-      className="relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
+      className="lazy-section relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
     >
       <div className="panel overflow-hidden rounded-3xl p-5 sm:p-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="section-label">Naya feature · Tapri Mode</p>
             <h2 className="mt-3 font-display text-2xl font-extrabold sm:text-4xl">
-              Song mackground me <span className="text-rose">apna mahaul</span> banao
+              Song background me <span className="text-rose">apna mahaul</span> banao
             </h2>
             <p className="mt-2 max-w-lg text-xs leading-relaxed text-muted/70 sm:text-sm">
               Four ambient layers, generated live in your browser. No audio files

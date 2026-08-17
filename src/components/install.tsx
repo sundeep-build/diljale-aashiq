@@ -8,7 +8,7 @@ export function Install() {
   const { installed, canInstall, install } = useInstall();
 
   return (
-    <section className="relative z-10 page-w py-10 sm:py-14">
+    <section className="lazy-section relative z-10 page-w py-10 sm:py-14">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="panel flex flex-col justify-between overflow-hidden rounded-3xl p-5 sm:p-8">
           <div>

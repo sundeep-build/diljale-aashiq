@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import ReactDOM from "react-dom";
 import {
   Bricolage_Grotesque,
   DM_Sans,
@@ -19,19 +20,34 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-/** brush-pen wordmark, and the rare font that covers Latin AND Devanagari */
+/**
+ * The brush-pen wordmark, and nothing else. `.brush` pins font-weight to 700
+ * and every string it wraps is Latin — all Devanagari on the site goes through
+ * `--font-deva` below — so the 400 weight and the devanagari subset were two
+ * font files nobody ever rendered a glyph from.
+ */
 const kalam = Kalam({
   variable: "--font-kalam",
-  subsets: ["latin", "devanagari"],
-  weight: ["400", "700"],
+  subsets: ["latin"],
+  weight: ["700"],
   display: "swap",
 });
 
+/**
+ * Devanagari, at the two weights the markup actually asks for (400 and 700 —
+ * 600 was never used).
+ *
+ * `preload: false` on purpose. Devanagari here is secondary text: subtitles,
+ * chip labels, the odd accent line. Preloading it put ~130KB at the front of
+ * the queue on every first visit, ahead of the CSS and JS the page cannot
+ * paint without. It still loads and still swaps in — it just waits its turn.
+ */
 const deva = Noto_Serif_Devanagari({
   variable: "--font-noto-deva",
   subsets: ["devanagari", "latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
+  preload: false,
 });
 
 const SITE =
@@ -80,6 +96,19 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  /* The album art in the hero and in every track row comes from ytimg, and the
+     player itself is fetched from youtube.com once the page has settled. Both
+     handshakes are worth opening up front — several hundred milliseconds each
+     on a slow link, paid before anything asks rather than during.
+
+     The Metadata API has no field for resource hints; `react-dom`'s methods
+     are the documented way to get them into <head>. See
+     node_modules/next/dist/docs/01-app/03-api-reference/04-functions/generate-metadata.md
+     ("Resource hints"). */
+  ReactDOM.preconnect("https://i.ytimg.com");
+  ReactDOM.preconnect("https://www.youtube.com");
+  ReactDOM.prefetchDNS("https://s.ytimg.com");
+
   return (
     /* The font variables must sit on <html>, not <body>: Tailwind's @theme
        declares --font-display / --font-body / --font-brush on :root, and a

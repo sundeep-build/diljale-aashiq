@@ -43,7 +43,7 @@ export function Receipt() {
   };
 
   return (
-    <section className="relative z-10 page-w py-10 sm:py-14">
+    <section className="lazy-section relative z-10 page-w py-10 sm:py-14">
       <div className="panel grid gap-6 rounded-3xl p-5 sm:p-10 md:grid-cols-[1fr_auto] md:items-center">
         <div>
           <p className="section-label">Aaj raat ka hisaab</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRadio } from "./radio-provider";
+import { useRadio, useRadioProgress } from "./radio-provider";
 import { usePresence } from "./use-presence";
 import { useStationLine } from "./use-station-line";
 import { ROTATION_BY_SLUG } from "@/data/rotations";
@@ -16,18 +16,18 @@ export function Hero() {
     started,
     isPaused,
     isBuffering,
-    position,
-    duration,
     ready,
     failed,
     toggle,
     next,
     prev,
     reshuffle,
-    seekRatio,
     queue,
     index,
   } = useRadio();
+  // the playhead lives on its own context so its 3-per-second updates re-render
+  // this scrubber and nothing else on the page
+  const { position, duration, seekRatio } = useRadioProgress();
 
   const { live, total } = usePresence();
   const stationLine = useStationLine();
@@ -132,6 +132,10 @@ export function Hero() {
                     alt={`${current.title} album art`}
                     width={300}
                     height={300}
+                    // the one image above the fold: fetch it early, but decode
+                    // off the main thread so it cannot delay first paint
+                    fetchPriority="high"
+                    decoding="async"
                     className={cx(
                       "size-full object-cover transition-all duration-700",
                       spinning
@@ -201,9 +205,12 @@ export function Hero() {
                   className="group relative block h-5 w-full cursor-pointer"
                 >
                   <span className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-cream/12" />
+                  {/* scaleX, not width: an animated `width` re-runs layout on
+                      every frame of every song, and this bar transitions three
+                      times a second for as long as the radio is on */}
                   <span
-                    className="absolute top-1/2 left-0 h-1 -translate-y-1/2 rounded-full bg-rose transition-[width] duration-300"
-                    style={{ width: `${progress * 100}%` }}
+                    className="absolute inset-x-0 top-1/2 h-1 origin-left -translate-y-1/2 rounded-full bg-rose transition-transform duration-300"
+                    style={{ transform: `translateY(-50%) scaleX(${progress})` }}
                   />
                   <span
                     className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose opacity-0 shadow-[0_0_12px_var(--color-rose)] transition-opacity group-hover:opacity-100"

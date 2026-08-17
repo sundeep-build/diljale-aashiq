@@ -116,9 +116,13 @@
   from { opacity: 0; transform: translateY(22px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* The storm clouds are huge blurred blobs. `scale` used to be in here, and a
+   scaling element with a 130px blur cannot be composited — the browser has to
+   re-run the blur at a new size on every single frame. Translation alone runs
+   entirely on the compositor: the blur is rasterised once and then just moved. */
 @keyframes drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(3%, -4%, 0) scale(1.08); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(3%, -4%, 0); }
 }
 
 @layer base {
@@ -154,15 +158,36 @@
 }
 
 @layer components {
-  /* frosted card used across every section */
+  /* Frosted card used across every section — and there are a lot of them: the
+     track list alone paints one per row.
+
+     This used to be `backdrop-filter: blur(14px)`, which was the single most
+     expensive thing on the page. A backdrop filter has to re-read and re-blur
+     whatever sits behind it every time that region changes, and what sits
+     behind every panel here is the rain — an animation that never stops. So
+     the browser was re-blurring 15-100 large rectangles at 60fps, forever.
+
+     The backdrop behind a panel is a dark vignette, and a 14px blur of a dark
+     vignette is a flat dark tint, so the scrim below reproduces it almost
+     exactly at zero per-frame cost. */
   .panel {
-    background: linear-gradient(
-      160deg,
-      color-mix(in oklab, var(--color-cream) 7%, transparent),
-      color-mix(in oklab, var(--color-cream) 2%, transparent)
-    );
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in oklab, var(--color-cream) 7%, transparent),
+        color-mix(in oklab, var(--color-cream) 2%, transparent)
+      ),
+      color-mix(in oklab, var(--color-ink-2) 72%, transparent);
     border: 1px solid color-mix(in oklab, var(--color-cream) 10%, transparent);
-    backdrop-filter: blur(14px);
+  }
+
+  /* Below-the-fold sections skip layout, style and paint entirely until they
+     scroll near the viewport. `auto` intrinsic sizing means the browser
+     remembers each section's real height after the first pass, so anchor
+     links and scroll position stay honest. */
+  .lazy-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 640px;
   }
 
   .panel-hover {
@@ -237,29 +262,39 @@
     opacity: 0.75;
   }
 
-  /* film grain + scanlines, sits above the background art, below content */
-  .grain::after {
-    content: "";
-    position: fixed;
-    inset: -50%;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.22;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+  /* Film grain + scanlines, above the background art and below content.
 
-  .scanlines::before {
+     The grain used to cover `inset: -50%` — four viewports of area — with a
+     three-octave feTurbulence. It is a static layer that never moves, so the
+     extra area bought nothing but raster time and GPU memory. One viewport,
+     two octaves, and a smaller tile look the same and cost a quarter. */
+  .grain::after {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    opacity: 0.35;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgba(0, 0, 0, 0.35) 2px 3px
-    );
+    opacity: 0.22;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Scanlines are a 3px pattern. On a phone at DPR 3 that lands near the
+     physical pixel grid, so it costs a full-viewport fine-detail paint and
+     reads as moiré rather than CRT. Desktop only. */
+  @media (width >= 48rem) {
+    .scanlines::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.35;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0 2px,
+        rgba(0, 0, 0, 0.35) 2px 3px
+      );
+    }
   }
 
   /* horizontal chip rows scroll without an ugly bar on desktop */
@@ -315,4 +350,43 @@
     transition-duration: 0.001ms !important;
   }
   html { scroll-behavior: auto; }
+}
+
+/* ------------------------------------------------------- power ----------
+   Two switches, both driven from use-motion.ts. See the note in that file
+   for why they exist; the short version is that the weather is the most
+   expensive thing on the page and it used to run unconditionally, forever.  */
+
+/* Backgrounded tab. Browsers throttle timers but keep compositor animations
+   ticking, so without this the rain runs at full rate behind whatever the
+   visitor actually switched to. Paused rather than removed: coming back to
+   the tab should look like the station never stopped, not like it reloaded. */
+html[data-idle="true"] *,
+html[data-idle="true"] *::before,
+html[data-idle="true"] *::after {
+  animation-play-state: paused !important;
+}
+
+/* Calm mode. The decorative weather comes out of the document entirely —
+   pausing would leave every layer resident as a composited texture, which is
+   most of what it costs a phone. What remains is the same street, still. */
+html[data-motion="calm"] .weather {
+  display: none;
+}
+
+/* The tapri lamp flicker lives on SVG <circle> elements, which Chrome cannot
+   composite — it is a main-thread style recalc on every frame for two dots. */
+html[data-motion="calm"] .animate-flicker,
+html[data-motion="calm"] .animate-marquee,
+html[data-motion="calm"] .animate-pulse {
+  animation: none;
+}
+
+/* The "live" and "on air" dots use Tailwind's `animate-pulse`, which animates
+   opacity — compositable in principle, but on a bare 6px inline span Chrome
+   was keeping it on the main thread and recalculating style on every frame,
+   permanently, for three dots. Promoting them hands the animation to the
+   compositor: same blink, no per-frame main-thread work. */
+.animate-pulse {
+  will-change: opacity;
 }
