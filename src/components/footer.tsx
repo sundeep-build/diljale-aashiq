@@ -1,4 +1,5 @@
 import { PLAYLIST_URL, TRACKS } from "@/data/tracks";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { BrokenHeart, Heart } from "./icons";
 
 const MARQUEE = [
@@ -46,6 +47,16 @@ export function Footer() {
               hearts. Every song streams from YouTube&rsquo;s official player,
               off a single YouTube Music playlist — we host nothing ourselves.
             </p>
+
+            <p className="mt-4 text-xs text-muted">
+              Contact at{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-rose-soft underline-offset-4 hover:text-cream hover:underline"
+              >
+                {CONTACT_EMAIL}
+              </a>
+            </p>
           </div>
 
           <div className="text-xs text-muted">
@@ -63,6 +74,11 @@ export function Footer() {
                   className="hover:text-cream"
                 >
                   YouTube Music playlist ↗
+                </a>
+              </li>
+              <li>
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-cream">
+                  Contact
                 </a>
               </li>
             </ul>

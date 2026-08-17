@@ -93,7 +93,7 @@ export function DedicationStudio() {
   return (
     <section
       id="dedicate"
-      className="lazy-section relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
+      className="relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
     >
       <div className="mb-6 text-center">
         <p className="section-label">Naya feature · Dil se dil tak</p>

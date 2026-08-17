@@ -61,7 +61,7 @@ export function TapriMode() {
   return (
     <section
       id="tapri"
-      className="lazy-section relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
+      className="relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
     >
       <div className="panel overflow-hidden rounded-3xl p-5 sm:p-10">
         <div className="flex flex-wrap items-end justify-between gap-4">

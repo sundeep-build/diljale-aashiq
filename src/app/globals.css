@@ -182,9 +182,16 @@
   }
 
   /* Below-the-fold sections skip layout, style and paint entirely until they
-     scroll near the viewport. `auto` intrinsic sizing means the browser
-     remembers each section's real height after the first pass, so anchor
-     links and scroll position stay honest. */
+     scroll near the viewport.
+
+     Applied ONLY to the tail of the page — the receipt, the install panel and
+     the footer — and deliberately not to any section that an in-page anchor
+     can scroll past. Before a section is rendered the browser sizes it with
+     the estimate below, so jumping to a target *underneath* a skipped section
+     lands against the estimate and is then shoved out of position when the
+     real height arrives. With the track list skipped, #tapri missed by about
+     4600px. Nothing links past these three, so the estimate can never move a
+     scroll target. */
   .lazy-section {
     content-visibility: auto;
     contain-intrinsic-size: auto 640px;

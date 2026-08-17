@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRadio } from "./radio-provider";
 import { usePresence } from "./use-presence";
 import { useInstall, useServiceWorker } from "./use-install";
 import { setMotion, useMotion } from "./use-motion";
 import { cx } from "@/lib/utils";
-import { BrokenHeart, Download, Rain } from "./icons";
+import { CONTACT_EMAIL } from "@/lib/site";
+import { BrokenHeart, Close, Download, Menu, Rain } from "./icons";
 
 const NAV = [
   { href: "#dial", label: "Dard-o-Meter" },
@@ -23,8 +24,49 @@ export function TopBar() {
   const { installed, canInstall, install } = useInstall();
   const motion = useMotion();
   const [clock, setClock] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   useServiceWorker();
+
+  /**
+   * Everything that should close the mobile menu.
+   *
+   * Escape returns focus to the button that opened it, because otherwise focus
+   * is left on a node that no longer exists and a keyboard user is dumped back
+   * at the top of the document. Widening past `md` closes it too — the links
+   * become the inline row again, and leaving a stale panel open over them is
+   * the classic resize bug.
+   */
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!headerRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+
+    // matches the `md:` breakpoint the panel is hidden at
+    const wide = window.matchMedia("(width >= 48rem)");
+    const onWiden = () => {
+      if (wide.matches) setMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    wide.addEventListener("change", onWiden);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      wide.removeEventListener("change", onWiden);
+    };
+  }, [menuOpen]);
 
   // client-only: the server has no idea what time it is where you are, and a
   // mismatched clock is the classic hydration bug
@@ -50,7 +92,10 @@ export function TopBar() {
        (24px) over a 70% ink wash; a 90% wash on small screens gets to the same
        place for free, and the real blur is kept only from `md` up, where the
        device is likelier to have the headroom for it. */
-    <header className="sticky top-0 z-40 border-b border-cream/10 bg-ink/90 md:bg-ink/70 md:backdrop-blur-md">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-40 border-b border-cream/10 bg-ink/90 md:bg-ink/70 md:backdrop-blur-md"
+    >
       <div className="page-w flex h-14 items-center gap-2 sm:h-16 sm:gap-3">
         <Link href="/" className="group flex shrink-0 items-center gap-2">
           <span className="relative grid size-8 place-items-center">
@@ -64,8 +109,11 @@ export function TopBar() {
           </span>
         </Link>
 
-        {/* min-w-0 lets the chip row shrink instead of widening the header */}
-        <nav className="hide-scrollbar -mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1">
+        {/* Desktop only. On a phone this was a horizontally scrolling chip row
+            competing for width with the status chips beside it — the menu
+            below holds the same links with room to read them.
+            min-w-0 lets the row shrink instead of widening the header. */}
+        <nav className="hide-scrollbar -mx-1 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 md:flex">
           {NAV.map((item) => (
             <a
               key={item.href}
@@ -77,7 +125,7 @@ export function TopBar() {
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
           {/* live listeners — real, or hidden entirely if we can't measure it */}
           {live !== null && (
             <span
@@ -145,8 +193,60 @@ export function TopBar() {
           >
             {clock ?? "--:--"}
           </span>
+
+          {/* the mobile way in to the same links the desktop row shows */}
+          <button
+            ref={menuButtonRef}
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            aria-label={menuOpen ? "Menu band karo" : "Menu kholo"}
+            className={cx(
+              "grid size-8 shrink-0 place-items-center rounded-full border transition md:hidden",
+              menuOpen
+                ? "border-rose/45 bg-rose/12 text-rose-soft"
+                : "border-cream/12 text-cream/80 hover:border-cream/25 hover:text-cream",
+            )}
+          >
+            {menuOpen ? <Close className="size-4" /> : <Menu className="size-4" />}
+          </button>
         </div>
       </div>
+
+      {/* Absolutely positioned rather than in flow: the header is sticky, so a
+          panel in flow would grow it and shove the whole page down every time
+          the menu opened. */}
+      {menuOpen && (
+        <nav
+          id="mobile-nav"
+          /* fully opaque, not a wash: the hero wordmark sits directly behind
+             this and ghosted straight through a translucent panel */
+          className="absolute inset-x-0 top-full border-b border-cream/10 bg-ink shadow-[0_24px_60px_-24px_rgba(0,0,0,0.95)] md:hidden"
+        >
+          <ul className="page-w flex flex-col py-2">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-xl px-3 py-3 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/8 hover:text-cream"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+            <li className="mt-1 border-t border-cream/10 pt-2">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-3 text-sm font-medium text-muted transition-colors hover:bg-cream/8 hover:text-cream"
+              >
+                Contact
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }
