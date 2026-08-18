@@ -41,7 +41,7 @@ export function DedicationPlayer({ accent }: { accent: string }) {
 
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-sm font-semibold">
-            {playing ? "Baj raha hai" : "Sunne ke liye dabao"}
+            {playing ? "Now Playing" : "Play a dedication to hear it here!"}
           </p>
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-cream/12">
             {/* scaleX rather than width — see the note on the hero scrubber */}

@@ -112,7 +112,10 @@ export function DedicationStudio() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr]">
         {/* ---------------- form ---------------- */}
-        <div className="panel rounded-3xl p-4 sm:p-7">
+        {/* min-w-0: without it the grid track is floored at this column's
+          min-content width, and the nowrap share link below would stretch
+          the column past the viewport instead of truncating. */}
+        <div className="panel min-w-0 rounded-3xl p-4 sm:p-7">
           <Field label="Kiske liye?" hint={`${to.length}/${LIMITS.to}`}>
             <input
               value={to}
@@ -264,7 +267,7 @@ export function DedicationStudio() {
         </div>
 
         {/* ---------------- live preview ---------------- */}
-        <div className="relative">
+        <div className="relative min-w-0">
           <p className="mb-2 text-center text-[11px] tracking-[0.18em] text-muted uppercase">
             Woh ye dekhenge
           </p>

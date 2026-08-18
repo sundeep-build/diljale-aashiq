@@ -40,7 +40,12 @@ export function Hero() {
     <section className="relative z-10 page-w pt-10 pb-6 sm:pt-16">
       <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-12">
         {/* ---------- headline ---------- */}
-        <div className="animate-rise relative mx-auto flex max-w-2xl flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
+        {/* min-w-0 on both grid children: a grid item's default `min-width:
+          auto` floors the track at the item's min-content width, and a
+          nowrap line inside (the title, the up-next line) makes that the
+          full untruncated string — so the card grew past the viewport
+          instead of the text truncating. */}
+        <div className="animate-rise relative mx-auto flex min-w-0 max-w-2xl flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
           {/* sleeve sticker — in flow, so it can't sit on top of the kicker */}
           <span className="advisory mb-5 -rotate-3 text-[0.5rem] tracking-[0.1em]">
             <span className="text-[0.62rem] tracking-[0.14em]">Diljale</span>
@@ -109,7 +114,7 @@ export function Hero() {
 
         {/* ---------- the console ---------- */}
         <div
-          className="panel animate-rise mx-auto w-full max-w-2xl rounded-3xl p-3.5 sm:p-6 lg:mt-0"
+          className="panel animate-rise mx-auto w-full min-w-0 max-w-2xl rounded-3xl p-3.5 sm:p-6 lg:mt-0"
           style={{ animationDelay: "120ms" }}
         >
           <div className="flex items-start gap-4 sm:gap-5">
@@ -166,7 +171,7 @@ export function Hero() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="section-label !text-[0.62rem]">
-                  {started ? "Ab baj raha hai" : "Next cassette"}
+                  {started ? "Now Playing" : "Next cassette"}
                 </span>
                 {rot && (
                   <span
@@ -183,7 +188,10 @@ export function Hero() {
                 )}
               </div>
 
-              <h2 className="mt-1.5 truncate font-display text-xl font-bold sm:text-2xl">
+              {/* wraps to two lines instead of truncating: a long title on a
+                narrow phone loses too much of itself to an ellipsis.
+                break-words catches the rare title with no spaces to break. */}
+              <h2 className="mt-1.5 font-display text-lg font-bold break-words line-clamp-2 sm:text-2xl">
                 {current?.title ?? "Tuning in…"}
               </h2>
               <p className="truncate text-xs text-muted sm:text-sm">
