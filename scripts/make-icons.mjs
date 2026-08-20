@@ -11,7 +11,10 @@ import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.join(here, "..", "public");
+const publicDir = path.join(here, "..", "public");
+/* apple-icon.png is an app-router file convention, not a static asset: Next
+   serves it from src/app and would collide with a copy in public/. */
+const appDir = path.join(here, "..", "src", "app");
 
 /** implicit heart: (x²+y²-1)³ - x²y³ ≤ 0 */
 function insideHeart(x, y) {
@@ -30,24 +33,26 @@ function mix(a, b, t) {
 function render(size, { maskable }) {
   const px = Buffer.alloc(size * size * 4);
   const pad = maskable ? 0.52 : 0.68; // maskable icons need a safe zone
-  const bgTop = [0x3a, 0x0f, 0x26];
-  const bgBottom = [0x0a, 0x05, 0x08];
-  const roseA = [0xff, 0x6b, 0x8f];
-  const roseB = [0xff, 0x2f, 0x5e];
+  // the palette in globals.css, in bytes: warm near-black behind the
+  // signboard's red, lit from above the way the stall's bulb lights the sign
+  const bgTop = [0x3a, 0x1e, 0x0c];
+  const bgBottom = [0x0c, 0x09, 0x04];
+  const roseA = [0xe0, 0x7a, 0x50];
+  const roseB = [0xc8, 0x38, 0x1a];
 
   for (let py = 0; py < size; py++) {
     for (let pxi = 0; pxi < size; pxi++) {
       const i = (py * size + pxi) * 4;
 
-      // background: vertical wine gradient with a soft glow behind the heart
+      // background: vertical dusk gradient with a soft glow behind the heart
       const t = py / (size - 1);
       let [r, g, b] = mix(bgTop, bgBottom, Math.min(1, t * 1.25));
       const gx = (pxi / size - 0.5) * 2;
       const gy = (py / size - 0.45) * 2;
       const glow = Math.max(0, 1 - Math.sqrt(gx * gx + gy * gy) * 1.15);
-      r = Math.min(255, r + glow * 90);
-      g = Math.min(255, g + glow * 18);
-      b = Math.min(255, b + glow * 40);
+      r = Math.min(255, r + glow * 95);
+      g = Math.min(255, g + glow * 52);
+      b = Math.min(255, b + glow * 18);
 
       // heart, sampled 2x2 for cheap anti-aliasing
       let cover = 0;
@@ -142,17 +147,17 @@ function encodePng(width, height, rgba) {
 
 /* ---------------- write them out ---------------- */
 
-fs.mkdirSync(outDir, { recursive: true });
-
 const targets = [
-  { file: "icon-192.png", size: 192, maskable: false },
-  { file: "icon-512.png", size: 512, maskable: false },
-  { file: "icon-maskable-512.png", size: 512, maskable: true },
-  { file: "apple-icon.png", size: 180, maskable: false },
+  { dir: publicDir, file: "public/icon-192.png", size: 192, maskable: false },
+  { dir: publicDir, file: "public/icon-512.png", size: 512, maskable: false },
+  { dir: publicDir, file: "public/icon-maskable-512.png", size: 512, maskable: true },
+  { dir: appDir, file: "src/app/apple-icon.png", size: 180, maskable: false },
 ];
 
 for (const t of targets) {
+  const dest = path.join(here, "..", t.file);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
   const png = render(t.size, { maskable: t.maskable });
-  fs.writeFileSync(path.join(outDir, t.file), png);
-  console.log(`wrote public/${t.file} (${png.length} bytes)`);
+  fs.writeFileSync(dest, png);
+  console.log(`wrote ${t.file} (${png.length} bytes)`);
 }

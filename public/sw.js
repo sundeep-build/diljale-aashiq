@@ -3,7 +3,7 @@
  * never caches HTML documents beyond a single fallback, and gets out of the
  * way the moment the network is available.
  */
-const CACHE = "diljale-v2";
+const CACHE = "diljale-v3";
 const SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {

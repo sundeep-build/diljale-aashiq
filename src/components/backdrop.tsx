@@ -23,15 +23,15 @@ export function Backdrop() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
       {/* base wash — colder and darker than before, like the cover */}
-      <div className="absolute inset-0 bg-[radial-gradient(120%_85%_at_50%_-10%,#3b1020_0%,#160a10_42%,#070406_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(120%_85%_at_50%_-10%,#3a1e0c_0%,#170f07_42%,#080503_100%)]" />
 
       {/* Storm clouds rolling behind the skyline. Blur radii are down from
           130-140px: the blur is rasterised once, but a softer one over this
           much area is still real memory on a phone, and at this scale the
           difference is invisible. */}
-      <div className="weather animate-drift absolute -left-40 -top-24 h-[30rem] w-[38rem] rounded-full bg-[#5a1830]/30 blur-[100px]" />
+      <div className="weather animate-drift absolute -left-40 -top-24 h-[30rem] w-[38rem] rounded-full bg-[#5a3010]/30 blur-[100px]" />
       <div
-        className="weather animate-drift absolute -right-32 top-4 h-[26rem] w-[34rem] rounded-full bg-[#2a1030]/40 blur-[100px]"
+        className="weather animate-drift absolute -right-32 top-4 h-[26rem] w-[34rem] rounded-full bg-[#2b1c0c]/40 blur-[100px]"
         style={{ animationDelay: "-5s" }}
       />
       <div
@@ -43,7 +43,7 @@ export function Backdrop() {
       <Rain />
 
       {/* wet-street sheen along the bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,rgba(255,47,94,0.09),transparent)]" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,rgba(200,56,26,0.10),transparent)]" />
 
       <Splashes />
 
@@ -90,7 +90,7 @@ function Rain() {
  * gradient so the whole thing stays one paint, and the element travels exactly
  * one pattern tile per cycle — that is what makes the loop seamless.
  */
-function Curtain({
+export function Curtain({
   opacity,
   gap,
   len,
@@ -200,7 +200,7 @@ function DropField({
               // blurred shadows on a 1.5px far drop is pure paint cost for
               // something sub-pixel, so only the near layer carries one.
               boxShadow: near
-                ? `0 0 ${w * 3}px rgba(200,225,255,0.4), 0 ${len * 0.2}px ${w * 4}px rgba(255,47,94,0.18)`
+                ? `0 0 ${w * 3}px rgba(200,225,255,0.4), 0 ${len * 0.2}px ${w * 4}px rgba(200,56,26,0.20)`
                 : undefined,
               // Promotion is not free — it is a GPU texture per drop. Worth it
               // for the near layer you actually watch, wasteful for the haze.
@@ -235,7 +235,7 @@ function Splashes() {
                 height: size * 0.34,
                 borderRadius: "50%",
                 border: "1px solid rgba(233,240,255,0.45)",
-                boxShadow: "0 0 8px rgba(255,47,94,0.25)",
+                boxShadow: "0 0 8px rgba(200,56,26,0.28)",
                 // resting state, for when reduced-motion cancels the animation
                 opacity: 0,
                 animation: `splash ${dur.toFixed(2)}s ease-out infinite`,
@@ -338,7 +338,7 @@ function GlassDrops() {
                     rgba(150,175,210,0.14) 72%,
                     rgba(255,255,255,0.08) 100%)`,
                   boxShadow: `inset -1px -2px 4px rgba(255,255,255,0.35),
-                    inset 2px 3px 5px rgba(255,47,94,0.16),
+                    inset 2px 3px 5px rgba(200,56,26,0.18),
                     0 2px 7px rgba(0,0,0,0.4)`,
                 }}
               >
@@ -375,16 +375,16 @@ function Scene() {
     >
       <defs>
         <linearGradient id="bd-far" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2a1220" />
-          <stop offset="100%" stopColor="#10060c" />
+          <stop offset="0%" stopColor="#2c1d0d" />
+          <stop offset="100%" stopColor="#100a05" />
         </linearGradient>
         <linearGradient id="bd-wall" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#241119" />
-          <stop offset="100%" stopColor="#0d0509" />
+          <stop offset="0%" stopColor="#251a0e" />
+          <stop offset="100%" stopColor="#0d0805" />
         </linearGradient>
         <linearGradient id="bd-near" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1a0c15" />
-          <stop offset="100%" stopColor="#070406" />
+          <stop offset="0%" stopColor="#1b1309" />
+          <stop offset="100%" stopColor="#080503" />
         </linearGradient>
       </defs>
 
@@ -409,18 +409,18 @@ function Scene() {
       {/* ---- the wall, with the dripping broken heart ---- */}
       <g>
         <rect x="548" y="86" width="197" height="244" fill="url(#bd-wall)" />
-        <rect x="548" y="86" width="197" height="4" fill="#3a1020" opacity="0.7" />
+        <rect x="548" y="86" width="197" height="4" fill="#3a2411" opacity="0.7" />
 
         {/* graffiti heart, split down the middle, paint running off it */}
         <g transform="translate(640 150)" opacity="0.5">
           <path
             d="M0 30S-22 15-28 2A11 11 0 0 1-0.5-8 11 11 0 0 1 28 2C22 15 0 30 0 30Z"
-            fill="#c01033"
+            fill="#b0311a"
           />
-          <path d="M0 -8 -7 8l10 5.5-8 12" stroke="#0d0509" strokeWidth="3.4"
+          <path d="M0 -8 -7 8l10 5.5-8 12" stroke="#0d0805" strokeWidth="3.4"
             strokeLinecap="round" strokeLinejoin="round" fill="none" />
           {[[-13, 26, 20], [4, 30, 30], [15, 24, 14]].map(([x, y, len], i) => (
-            <rect key={i} x={x} y={y} width="2.4" height={len} rx="1.2" fill="#c01033"
+            <rect key={i} x={x} y={y} width="2.4" height={len} rx="1.2" fill="#b0311a"
               opacity={0.75 - i * 0.15} />
           ))}
         </g>
@@ -430,7 +430,7 @@ function Scene() {
       {/* built from round-capped strokes rather than outlines: limbs stay the
           right thickness and the joints meet cleanly at any scale */}
       <g
-        stroke="#070406"
+        stroke="#080503"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -441,7 +441,7 @@ function Scene() {
         <path d="M733 250 L771 267" strokeWidth="11" />
         <path d="M781 297 L795 297" strokeWidth="9" />
       </g>
-      <g fill="#070406">
+      <g fill="#080503">
         {/* head, tipped back toward the rain */}
         <circle cx="727" cy="226" r="12" />
         <path d="M716 222c1-9 8-14 15-12 5 1 8 5 8 9-5-3-11-3-16-1-3 1-5 2-7 4Z" />
@@ -449,7 +449,7 @@ function Scene() {
 
       {/* reflection in the wet ground */}
       <g
-        stroke="#070406"
+        stroke="#080503"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -464,22 +464,22 @@ function Scene() {
       {/* ---- the tapri, further down the street ---- */}
       <g opacity="0.9">
         <rect x="840" y="212" width="180" height="118" fill="url(#bd-near)" />
-        <rect x="828" y="204" width="204" height="14" rx="4" fill="#3a1020" />
+        <rect x="828" y="204" width="204" height="14" rx="4" fill="#3a2411" />
         {Array.from({ length: 7 }).map((_, i) => (
-          <rect key={i} x={830 + i * 28} y="204" width="14" height="14" fill="#ff2f5e"
+          <rect key={i} x={830 + i * 28} y="204" width="14" height="14" fill="#c8381a"
             opacity="0.5" />
         ))}
-        <rect x="882" y="248" width="52" height="82" fill="#070406" />
+        <rect x="882" y="248" width="52" height="82" fill="#080503" />
         <rect x="960" y="244" width="42" height="32" rx="3" fill="#ffbe6b" opacity="0.24" />
-        <line x1="930" y1="204" x2="930" y2="232" stroke="#3a1020" strokeWidth="2" />
+        <line x1="930" y1="204" x2="930" y2="232" stroke="#3a2411" strokeWidth="2" />
         <circle cx="930" cy="236" r="5" fill="#ffd9a0" className="animate-flicker" />
         <circle cx="930" cy="236" r="20" fill="#ffbe6b" opacity="0.12"
           className="animate-flicker" />
       </g>
 
       {/* wet road, with a smear of light across it */}
-      <rect x="0" y="300" width="1200" height="20" fill="#070406" />
-      <rect x="0" y="302" width="1200" height="3" fill="#ff2f5e" opacity="0.12" />
+      <rect x="0" y="300" width="1200" height="20" fill="#080503" />
+      <rect x="0" y="302" width="1200" height="3" fill="#c8381a" opacity="0.12" />
     </svg>
   );
 }

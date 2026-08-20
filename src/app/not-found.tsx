@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="relative z-10 grid min-h-dvh place-items-center bg-[radial-gradient(120%_80%_at_50%_-10%,#3a0f26_0%,#150a11_45%,#0a0508_100%)] px-6 text-center">
+    <main className="relative z-10 grid min-h-dvh place-items-center bg-[radial-gradient(120%_80%_at_50%_-10%,#3a1e0c_0%,#170f07_45%,#0c0904_100%)] px-6 text-center">
       <div>
         <p className="font-deva text-6xl font-bold text-rose neon-text">खो गया</p>
         <h1 className="mt-4 font-display text-2xl font-extrabold">

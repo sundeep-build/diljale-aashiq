@@ -13,10 +13,10 @@ const LAYERS: {
   Icon: (p: { className?: string }) => React.ReactElement;
   tint: string;
 }[] = [
-  { id: "baarish", name: "Baarish", deva: "बारिश", hint: "Chhat pe girti hui", Icon: Rain, tint: "#6a9cff" },
-  { id: "tapri", name: "Chai Tapri", deva: "टपरी", hint: "Door se aati bakbak", Icon: Cup, tint: "#ffbe6b" },
-  { id: "rail", name: "Raat ki Rail", deva: "रेल", hint: "Patri pe khatkhat", Icon: Train, tint: "#ff8a3d" },
-  { id: "pankha", name: "Chhat ka Pankha", deva: "पंखा", hint: "Ghoomta hua, roz ki tarah", Icon: Fan, tint: "#00d5b0" },
+  { id: "baarish", name: "Baarish", deva: "बारिश", hint: "Chhat pe girti hui", Icon: Rain, tint: "#7fa8c9" },
+  { id: "tapri", name: "Chai Tapri", deva: "टपरी", hint: "Door se aati bakbak", Icon: Cup, tint: "#e0b574" },
+  { id: "rail", name: "Raat ki Rail", deva: "रेल", hint: "Patri pe khatkhat", Icon: Train, tint: "#c2622c" },
+  { id: "pankha", name: "Chhat ka Pankha", deva: "पंखा", hint: "Ghoomta hua, roz ki tarah", Icon: Fan, tint: "#84a389" },
 ];
 
 const PRESETS: { name: string; deva: string; mix: Partial<Record<LayerId, number>> }[] = [

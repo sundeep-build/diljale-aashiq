@@ -1,6 +1,6 @@
 "use client";
 
-import { ROTATIONS } from "@/data/rotations";
+import { liftedAccent, ROTATIONS } from "@/data/rotations";
 import { TRACKS } from "@/data/tracks";
 import { useRadio } from "./radio-provider";
 import { cx, pluralise } from "@/lib/utils";
@@ -53,7 +53,7 @@ export function Rotations() {
 
               <div className="relative flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="font-deva text-2xl font-bold" style={{ color: r.from }}>
+                  <span className="font-deva text-2xl font-bold" style={{ color: liftedAccent(r.from) }}>
                     {r.deva}
                   </span>
                   <h3 className="mt-0.5 font-display text-lg font-bold">{r.name}</h3>
@@ -61,7 +61,7 @@ export function Rotations() {
 
                 <span
                   className="grid size-10 shrink-0 place-items-center rounded-full transition group-hover:scale-110"
-                  style={{ background: `${r.from}22`, color: r.from }}
+                  style={{ background: `${r.from}22`, color: liftedAccent(r.from) }}
                 >
                   {playing ? <Bars color={r.from} /> : <Play className="ml-0.5 size-4" />}
                 </span>

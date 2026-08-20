@@ -7,7 +7,7 @@ import { cx } from "@/lib/utils";
 import { Next, Pause, Play, Prev } from "./icons";
 
 /**
- * Sticky mini-player. Appears once the console scrolls out of view so the
+ * Sticky mini-player. Appears once the hero player scrolls out of view so the
  * transport is always a thumb away on a phone.
  */
 export function RadioBar() {
@@ -15,7 +15,30 @@ export function RadioBar() {
   const { position, duration } = useRadioProgress();
   const [show, setShow] = useState(false);
 
+  /**
+   * Watch the hero's player rather than a scroll distance. The hero is a full
+   * viewport of photograph, so its card sits wherever the visitor's viewport
+   * happens to put it — any fixed threshold either shows this bar while that
+   * one is still on screen (two transports, two progress bars) or leaves a
+   * dead stretch with neither. An observer just asks.
+   *
+   * The scroll listener is the fallback for pages that mount a Shell without
+   * a hero — the dedication page is one.
+   */
   useEffect(() => {
+    const heroPlayer = document.getElementById("hero-player");
+
+    if (heroPlayer) {
+      const io = new IntersectionObserver(
+        ([entry]) => setShow(!entry.isIntersecting),
+        // a sliver still counts as visible; handing over at exactly 0 makes
+        // the two players trade places on a single pixel of scroll
+        { threshold: 0.15 },
+      );
+      io.observe(heroPlayer);
+      return () => io.disconnect();
+    }
+
     const onScroll = () => setShow(window.scrollY > 520);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

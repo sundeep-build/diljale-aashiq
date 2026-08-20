@@ -22,7 +22,7 @@ export default async function Image({
   const { payload } = await params;
   const d = decodeDedication(payload);
 
-  const accent = d ? ROTATION_BY_SLUG[d.track.rotation].from : "#ff2f5e";
+  const accent = d ? ROTATION_BY_SLUG[d.track.rotation].from : "#c8381a";
   const to = d?.to ?? "Tumhare liye";
   const note = d?.note ?? "Ye gaana sun lena.";
   const from = d?.from?.trim();
@@ -38,8 +38,8 @@ export default async function Image({
           justifyContent: "space-between",
           padding: 56,
           overflow: "hidden",
-          background: `radial-gradient(1000px 520px at 15% -10%, ${accent}55 0%, #150a11 45%, #0a0508 100%)`,
-          color: "#f9edf0",
+          background: `radial-gradient(1000px 520px at 15% -10%, ${accent}55 0%, #170f07 45%, #0c0904 100%)`,
+          color: "#f2e4c9",
           fontFamily: "sans-serif",
         }}
       >
@@ -57,7 +57,7 @@ export default async function Image({
               fontSize: 22,
               letterSpacing: 8,
               textTransform: "uppercase",
-              color: "#ab8794",
+              color: "#a3866a",
             }}
           >
             Diljale Aashiq · Dedication
@@ -65,7 +65,7 @@ export default async function Image({
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ fontSize: 26, color: "#ab8794", letterSpacing: 6 }}>
+          <div style={{ fontSize: 26, color: "#a3866a", letterSpacing: 6 }}>
             YE GAANA
           </div>
           <div
@@ -78,7 +78,7 @@ export default async function Image({
           >
             {to}
           </div>
-          <div style={{ fontSize: 26, color: "#ab8794", letterSpacing: 6 }}>
+          <div style={{ fontSize: 26, color: "#a3866a", letterSpacing: 6 }}>
             KE NAAM
           </div>
           <div
@@ -86,14 +86,14 @@ export default async function Image({
               marginTop: 14,
               fontSize: 31,
               lineHeight: 1.32,
-              color: "#f9edf0dd",
+              color: "#f2e4c9dd",
               maxWidth: 940,
             }}
           >
             {`“${note.length > 120 ? `${note.slice(0, 118)}…` : note}”`}
           </div>
           {from && (
-            <div style={{ marginTop: 6, fontSize: 26, color: "#ab8794" }}>
+            <div style={{ marginTop: 6, fontSize: 26, color: "#a3866a" }}>
               {`— ${from}`}
             </div>
           )}
@@ -113,7 +113,7 @@ export default async function Image({
             <div style={{ fontSize: 34, fontWeight: 700 }}>
               {d?.track.title ?? "Diljale Aashiq"}
             </div>
-            <div style={{ fontSize: 24, color: "#ab8794" }}>
+            <div style={{ fontSize: 24, color: "#a3866a" }}>
               {d?.track.artists ?? "24×7 dard ka radio"}
             </div>
           </div>

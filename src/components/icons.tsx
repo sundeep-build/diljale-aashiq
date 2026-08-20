@@ -49,7 +49,7 @@ export const BrokenHeart = ({ className }: P) => (
       d="M12 21s-7.5-4.6-9.6-9A5.4 5.4 0 0 1 12 6.2 5.4 5.4 0 0 1 21.6 12c-2.1 4.4-9.6 9-9.6 9Z"
       fill="currentColor"
     />
-    <path d="M12 6.2 9.7 11l3.4 1.9L10.6 17" stroke="#0a0508" strokeWidth="1.6"
+    <path d="M12 6.2 9.7 11l3.4 1.9L10.6 17" stroke="#0c0904" strokeWidth="1.6"
       strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );

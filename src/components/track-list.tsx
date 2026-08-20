@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ROTATIONS, ROTATION_BY_SLUG } from "@/data/rotations";
+import { liftedAccent, ROTATIONS, ROTATION_BY_SLUG } from "@/data/rotations";
 import { TRACKS, type RotationSlug } from "@/data/tracks";
 import { useRadio } from "./radio-provider";
 import { cx, fmtTime } from "@/lib/utils";
@@ -86,7 +86,7 @@ export function TrackList() {
                   ? "border-transparent text-ink"
                   : "border-cream/12 text-muted hover:border-cream/25 hover:text-cream",
               )}
-              style={active ? { background: meta?.from ?? "var(--color-rose)" } : undefined}
+              style={active ? { background: liftedAccent(meta?.from ?? "var(--color-rose)") } : undefined}
             >
               {meta ? meta.name : "Sab"}
             </button>

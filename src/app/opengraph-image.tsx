@@ -20,8 +20,8 @@ export default function Image() {
           justifyContent: "space-between",
           padding: 72,
           background:
-            "radial-gradient(1100px 560px at 50% -15%, #3a0f26 0%, #150a11 45%, #0a0508 100%)",
-          color: "#f9edf0",
+            "radial-gradient(1100px 560px at 50% -15%, #3a1e0c 0%, #170f07 45%, #0c0904 100%)",
+          color: "#f2e4c9",
           fontFamily: "sans-serif",
         }}
       >
@@ -30,7 +30,7 @@ export default function Image() {
             fontSize: 22,
             letterSpacing: 9,
             textTransform: "uppercase",
-            color: "#ab8794",
+            color: "#a3866a",
           }}
         >
           Jalandhar · Raat 2 baje · Non-stop
@@ -42,16 +42,16 @@ export default function Image() {
               fontSize: 128,
               fontWeight: 800,
               lineHeight: 0.95,
-              color: "#ff2f5e",
+              color: "#c8381a",
             }}
           >
             Diljale Aashiq
           </div>
           {/* satori needs a single text child per node — keep these interpolated */}
-          <div style={{ fontSize: 40, color: "#f9edf0cc" }}>
+          <div style={{ fontSize: 40, color: "#f2e4c9cc" }}>
             {`24×7 dard ka radio · ${TRACKS.length} heartbreak songs`}
           </div>
-          <div style={{ fontSize: 30, color: "#ab8794", marginTop: 8 }}>
+          <div style={{ fontSize: 30, color: "#a3866a", marginTop: 8 }}>
             Playlist mat chuno. Dard chuno.
           </div>
         </div>
