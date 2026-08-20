@@ -34,8 +34,11 @@ storage** — no KV, no Postgres, no row limit, and the link still works years l
 WhatsApp gets a proper preview because the route renders its own OG image on the fly with
 `next/og`.
 
-Bonus: **Aaj raat ka hisaab** — the session prints itself as a thermal-receipt PNG drawn on
-a `<canvas>` ([`src/components/receipt.tsx`](src/components/receipt.tsx)), ready to post.
+Bonus: **Aaj raat ka poster** — the session draws itself as a story (9:16) or feed (4:5)
+card on a `<canvas>` ([`src/lib/poster.ts`](src/lib/poster.ts)), tinted around whichever
+rotation the night lived in. The preview on the page *is* the export, and the share button
+hands the file straight to the OS share sheet, so it lands in Instagram or WhatsApp without
+a round trip. Drawn on the device: no upload, no server render, no image-generation cost.
 
 ---
 
@@ -250,10 +253,10 @@ src/
   components/
     radio-provider.tsx           queue, transport, YouTube player, session stats
     hero.tsx  dard-meter.tsx  rotations.tsx  track-list.tsx
-    tapri-mode.tsx  dedication-studio.tsx  receipt.tsx  radio-bar.tsx
+    tapri-mode.tsx  dedication-studio.tsx  poster.tsx  radio-bar.tsx
     backdrop.tsx                 the rainy 2am street, pure CSS + one inline SVG
   lib/
-    youtube-embed.ts  ambience.ts  dedication.ts  utils.ts
+    youtube-embed.ts  ambience.ts  dedication.ts  poster.ts  utils.ts
   data/
     tracks.ts                    generated — do not edit by hand
     rotations.ts                 mood definitions and dard copy

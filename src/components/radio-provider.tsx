@@ -411,7 +411,7 @@ export function RadioProvider({
    *    to keep ticking. The playhead is re-read the moment the tab comes back,
    *    so nothing appears stale.
    * 2. Listening time accumulates in a ref and is only committed to state when
-   *    the whole-minute value changes, because the minute is all the receipt
+   *    the whole-minute value changes, because the minute is all the poster
    *    ever renders. That is one re-render a minute instead of 200.
    */
   useEffect(() => {

@@ -5,7 +5,7 @@ import { Rotations } from "@/components/rotations";
 import { TrackList } from "@/components/track-list";
 import { TapriMode } from "@/components/tapri-mode";
 import { DedicationStudio } from "@/components/dedication-studio";
-import { Receipt } from "@/components/receipt";
+import { Poster } from "@/components/poster";
 import { Install } from "@/components/install";
 import { Footer } from "@/components/footer";
 
@@ -19,7 +19,7 @@ export default function Home() {
         <TrackList />
         <TapriMode />
         <DedicationStudio />
-        <Receipt />
+        <Poster />
         <Install />
       </Shell>
       <Footer />
