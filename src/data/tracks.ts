@@ -139,36 +139,6 @@ export const TRACKS: Track[] = [
     "dard": 6
   },
   {
-    "id": "j3XkfqVwVpU",
-    "title": "Fark",
-    "film": null,
-    "badge": null,
-    "artists": "Gippy Grewal",
-    "duration": 196000,
-    "playable": true,
-    "art": "https://i.ytimg.com/vi/j3XkfqVwVpU/hqdefault.jpg",
-    "yt": [
-      "j3XkfqVwVpU"
-    ],
-    "rotation": "vichoda",
-    "dard": 7
-  },
-  {
-    "id": "KHwlmdv8NFM",
-    "title": "Karha",
-    "film": null,
-    "badge": null,
-    "artists": "Honey Sidhu",
-    "duration": 193000,
-    "playable": true,
-    "art": "https://i.ytimg.com/vi/KHwlmdv8NFM/hqdefault.jpg",
-    "yt": [
-      "KHwlmdv8NFM"
-    ],
-    "rotation": "vichoda",
-    "dard": 7
-  },
-  {
     "id": "SbN6P-UQjcs",
     "title": "Teri Deewani",
     "film": null,
@@ -962,5 +932,110 @@ export const TRACKS: Track[] = [
     ],
     "rotation": "lofi",
     "dard": 5
+  },
+  {
+    "id": "jNDot_dDokk",
+    "title": "Jaan",
+    "film": null,
+    "badge": null,
+    "artists": "Happy Raikoti",
+    "duration": 228000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/jNDot_dDokk/hqdefault.jpg",
+    "yt": [
+      "jNDot_dDokk"
+    ],
+    "rotation": "vichoda",
+    "dard": 7
+  },
+  {
+    "id": "3X1tNeiz-jI",
+    "title": "Kade Ta Tu Avenga",
+    "film": null,
+    "badge": null,
+    "artists": "Runbir",
+    "duration": 276000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/3X1tNeiz-jI/hqdefault.jpg",
+    "yt": [
+      "3X1tNeiz-jI"
+    ],
+    "rotation": "vichoda",
+    "dard": 8
+  },
+  {
+    "id": "IOxTTrsCw_E",
+    "title": "Jannat",
+    "film": null,
+    "badge": null,
+    "artists": "B Praak",
+    "duration": 206000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/IOxTTrsCw_E/hqdefault.jpg",
+    "yt": [
+      "IOxTTrsCw_E"
+    ],
+    "rotation": "vichoda",
+    "dard": 8
+  },
+  {
+    "id": "dO8SmS8q9HU",
+    "title": "Paani",
+    "film": null,
+    "badge": null,
+    "artists": "Yuvraaj Hans",
+    "duration": 186000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/dO8SmS8q9HU/hqdefault.jpg",
+    "yt": [
+      "dO8SmS8q9HU"
+    ],
+    "rotation": "vichoda",
+    "dard": 7
+  },
+  {
+    "id": "Ih24MPuvdhs",
+    "title": "Mann Bharrya",
+    "film": null,
+    "badge": null,
+    "artists": "B Praak",
+    "duration": 277000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/Ih24MPuvdhs/hqdefault.jpg",
+    "yt": [
+      "Ih24MPuvdhs"
+    ],
+    "rotation": "vichoda",
+    "dard": 9
+  },
+  {
+    "id": "EA3wqy77yDg",
+    "title": "Taara",
+    "film": null,
+    "badge": null,
+    "artists": "Ammy Virk",
+    "duration": 279000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/EA3wqy77yDg/hqdefault.jpg",
+    "yt": [
+      "EA3wqy77yDg"
+    ],
+    "rotation": "vichoda",
+    "dard": 8
+  },
+  {
+    "id": "C1CEgV155J8",
+    "title": "Haaye Ve",
+    "film": null,
+    "badge": null,
+    "artists": "Ammy Virk",
+    "duration": 216000,
+    "playable": true,
+    "art": "https://i.ytimg.com/vi/C1CEgV155J8/hqdefault.jpg",
+    "yt": [
+      "C1CEgV155J8"
+    ],
+    "rotation": "vichoda",
+    "dard": 8
   }
 ];

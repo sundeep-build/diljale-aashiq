@@ -284,9 +284,6 @@ export function Poster() {
             aria-label={`Aaj raat ka poster: ${stats.played} gaane, ${minutes} minute, peak dard ${peak} out of 10. ${data.verdict}`}
             className="block h-auto w-full rounded-2xl ring-1 shadow-[0_40px_90px_-45px_rgba(0,0,0,1)] ring-cream/10"
           />
-          <p className="mt-3 text-center text-[11px] leading-relaxed text-muted/70">
-            Jaisa dikh raha hai, waisa hi save hoga.
-          </p>
         </div>
       </div>
     </section>

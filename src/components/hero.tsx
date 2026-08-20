@@ -62,7 +62,16 @@ export function Hero() {
         below it, over the dark of the stall, where cream on near-black is
         legible and nothing has to be obscured to make it so. */}
       <div className="page-w animate-rise relative flex flex-1 flex-col items-center justify-end pt-8 text-center sm:pt-10">
-        <p className="section-label" suppressHydrationWarning>
+        {/* Amber, not the shared label's rose-soft: this is the one
+            section-label that sits on the photograph rather than on ink, and
+            a chalky red disappeared into the pale boards behind it. The bulb
+            over the counter is the warmest thing in the frame — and the shadow
+            is what actually carries it across the light patches, same as the
+            wordmark and the Devanagari line below. */}
+        <p
+          className="section-label text-amber drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
+          suppressHydrationWarning
+        >
           {stationLine}
         </p>
 

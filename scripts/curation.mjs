@@ -80,6 +80,17 @@ export const CURATION = {
   "qbFpb4v68i4": ["lofi", 6],              // Khamoshiyan (Unplugged) — JEET GANNGULI OFFICIAL 
   "4oF7eCIH58U": ["lofi", 6],              // Tu Har Lamha (Remix by DJ Angel) — Bobby-Imran
   "p7yy0Ix9Hrc": ["lofi", 5],              // Bheegh Loon (Female - Remix by DJ Angel) — Ankit Tiwar
+
+  // added to the playlist Aug 2026 — all Punjabi, so all vichoda rather than
+  // the judaai the guesser reached for. The three with overrides were uploaded
+  // by label channels with the whole credit roll in the title.
+  "Ih24MPuvdhs": ["vichoda", 9],           // Mann Bharrya — B Praak
+  "IOxTTrsCw_E": ["vichoda", 8, "B Praak", "Jannat"],   // Jannat (Sufna) — Speed Records
+  "EA3wqy77yDg": ["vichoda", 8],           // Taara — Ammy Virk
+  "C1CEgV155J8": ["vichoda", 8],           // Haaye Ve — Ammy Virk
+  "3X1tNeiz-jI": ["vichoda", 8, "Runbir", "Kade Ta Tu Avenga"],   // MUSICREATIONZ STUDIO
+  "dO8SmS8q9HU": ["vichoda", 7],           // Paani — Yuvraaj Hans
+  "jNDot_dDokk": ["vichoda", 7, "Happy Raikoti", "Jaan"],         // Rajiv Dalal
 };
 
 /** What a freshly added song gets until you give it a mood of its own. */
