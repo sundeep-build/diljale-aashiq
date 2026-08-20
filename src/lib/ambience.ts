@@ -5,9 +5,17 @@
  * filtered noise plus a low-frequency oscillator per layer. There are no mp3s
  * to host, nothing to download, and no bandwidth bill — which is the whole
  * point on a free-tier deploy.
+ *
+ * It also synthesises THUNDER, which is not a layer at all — it is one-shot,
+ * and it is fired by lib/storm.ts rather than by anything on this page. The
+ * split is deliberate: the storm runs for every visitor from the moment the
+ * page loads, but only this module is allowed to own an AudioContext, so the
+ * storm asks and this module plays if audio has been unlocked.
  */
 
 export type LayerId = "baarish" | "tapri" | "rail" | "pankha";
+
+import type { Strike } from "./storm";
 
 type LayerSpec = {
   id: LayerId;
@@ -73,8 +81,19 @@ export class Ambience {
     pankha: 0,
   };
 
-  /** Must be called from a user gesture — browsers block audio otherwise. */
-  private ensure() {
+  /** kept on the instance because thunder borrows them for every clap */
+  private noise: Record<"white" | "brown", AudioBuffer> | null = null;
+
+  /**
+   * The context and nothing else: a master gain and the two noise buffers
+   * thunder is cut from. No sources, so this is close to free — which is the
+   * point, because the storm opens it for every visitor and most of them will
+   * never touch a fader.
+   *
+   * Must still be reached from a user gesture the first time; browsers block
+   * audio otherwise. See `unlock()`.
+   */
+  private context() {
     if (this.ctx) return this.ctx;
 
     const Ctor =
@@ -91,8 +110,32 @@ export class Ambience {
     master.connect(ctx.destination);
     this.master = master;
 
-    const white = makeNoiseBuffer(ctx, "white");
-    const brown = makeNoiseBuffer(ctx, "brown");
+    this.noise = {
+      white: makeNoiseBuffer(ctx, "white"),
+      brown: makeNoiseBuffer(ctx, "brown"),
+    };
+
+    return ctx;
+  }
+
+  /**
+   * Open the audio path without making a sound, so a thunderclap two minutes
+   * from now has somewhere to play. Called from the first pointer or key
+   * event on the page — the earliest moment the autoplay rules allow.
+   */
+  unlock() {
+    this.context();
+  }
+
+  /** The context plus the four steady layers, built the first time a fader moves. */
+  private ensure() {
+    const ctx = this.context();
+    if (!ctx || this.layers.size > 0) return ctx;
+
+    const master = this.master;
+    const noise = this.noise;
+    if (!master || !noise) return ctx;
+    const { white, brown } = noise;
 
     for (const spec of SPECS) {
       const src = ctx.createBufferSource();
@@ -169,8 +212,150 @@ export class Ambience {
     void this.ctx?.close();
     this.ctx = null;
     this.master = null;
+    this.noise = null;
     this.layers.clear();
+    // the graph is gone, so the record of what was playing has to go with it —
+    // otherwise a rebuilt context would believe layers are up that are silent
+    for (const id of Object.keys(this.volumes) as LayerId[]) this.volumes[id] = 0;
   }
+
+  /**
+   * The clap. Three voices, mixed by distance:
+   *
+   *   crack  — a short slap of high noise, the tearing sound of a near hit.
+   *            Gone entirely once the strike is more than a moment away.
+   *   body   — noise under a lowpass that falls as the sound travels, which
+   *            is the whole trick: air eats the treble first, so a distant
+   *            storm is the same clap with everything above a rumble removed.
+   *   sub    — a sine dropping toward 30Hz. The part you feel rather than hear.
+   *
+   * The amplitude curve matters as much as the filter. Thunder does not fade
+   * out smoothly — it tumbles, because you are hearing one flash reflected off
+   * clouds and buildings at a dozen different distances. The sine riding on
+   * the decay below is what turns a whoosh into a roll.
+   */
+  thunder(strike: Strike) {
+    const ctx = this.ctx;
+    const master = this.master;
+    const noise = this.noise;
+    // No context means nobody has touched the page yet, so there is nothing to
+    // play through and no way to open one. The sky flashes silently.
+    if (!ctx || !master || !noise) return;
+    // parked by the idle-suspend in `set()`; a clap is reason enough to wake it
+    if (ctx.state === "suspended") void ctx.resume();
+
+    const near = 1 - strike.distance;
+    const at = ctx.currentTime + strike.delay / 1000;
+    const dur = 2.4 + strike.distance * 4.4; // the far ones roll for longer
+    const level = strike.power * (0.22 + near * 0.5);
+
+    const pan = ctx.createStereoPanner?.();
+    const out: AudioNode = pan ?? master;
+    if (pan) {
+      pan.pan.value = strike.pan;
+      pan.connect(master);
+    }
+
+    /* ---- body ---- */
+    const body = ctx.createBufferSource();
+    body.buffer = noise.brown;
+    body.loop = true;
+
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(240 + near * 1500, at);
+    lp.frequency.exponentialRampToValueAtTime(64 + near * 70, at + dur);
+    lp.Q.value = 0.7;
+
+    const bodyGain = ctx.createGain();
+    bodyGain.gain.value = 0;
+    bodyGain.gain.setValueCurveAtTime(rollCurve(strike, level * 2.6), at, dur);
+
+    body.connect(lp).connect(bodyGain).connect(out);
+    // a random offset into the loop so no two claps are the same four seconds
+    body.start(at, Math.random() * 3);
+    body.stop(at + dur);
+
+    /* ---- sub ---- */
+    const sub = ctx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(58 + near * 30, at);
+    sub.frequency.exponentialRampToValueAtTime(29, at + dur * 0.7);
+
+    const subGain = ctx.createGain();
+    subGain.gain.value = 0;
+    subGain.gain.setValueAtTime(0, at);
+    subGain.gain.linearRampToValueAtTime(level * 0.5 * (0.3 + near), at + 0.05 + strike.distance * 0.2);
+    subGain.gain.exponentialRampToValueAtTime(0.0001, at + dur * 0.75);
+
+    sub.connect(subGain).connect(out);
+    sub.start(at);
+    sub.stop(at + dur * 0.8);
+
+    /* ---- crack ---- */
+    if (strike.bolt) {
+      const crack = ctx.createBufferSource();
+      crack.buffer = noise.white;
+      crack.loop = true;
+
+      const hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.value = 700 + near * 900;
+
+      const crackGain = ctx.createGain();
+      crackGain.gain.value = 0;
+      crackGain.gain.setValueAtTime(0, at);
+      crackGain.gain.linearRampToValueAtTime(level * 0.85 * near, at + 0.012);
+      crackGain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35 + near * 0.4);
+
+      crack.connect(hp).connect(crackGain).connect(out);
+      crack.start(at, Math.random() * 3);
+      crack.stop(at + 0.8);
+    }
+
+    // one clap is a dozen nodes; cut the branch loose once it has finished so
+    // the graph does not grow by that much every time the sky flashes
+    body.onended = () => {
+      window.setTimeout(() => (pan ?? bodyGain).disconnect(), 0);
+    };
+  }
+}
+
+/**
+ * One engine for the whole page.
+ *
+ * Tapri Mode drives the faders and lib/storm.ts fires the thunder, and they
+ * sit in completely different parts of the tree — a shared module-level
+ * instance is how they end up on the same AudioContext, which matters because
+ * browsers cap how many of those you may open. Constructing it is free:
+ * nothing reaches the audio hardware until `unlock()` or the first fader move.
+ */
+export const ambience = new Ambience();
+
+/**
+ * The rolling amplitude envelope, as a curve rather than a stack of ramps:
+ * attack (slow for a distant strike, a slap for a near one), then a decay
+ * with two lazy swells riding on it so the tail tumbles down instead of
+ * sliding out.
+ */
+function rollCurve(strike: Strike, peak: number) {
+  const steps = 72;
+  const curve = new Float32Array(steps);
+  const attack = Math.max(1, Math.round(steps * (0.015 + strike.distance * 0.13)));
+
+  for (let i = 0; i < steps; i++) {
+    if (i < attack) {
+      curve[i] = (i / attack) * peak;
+      continue;
+    }
+    const t = (i - attack) / (steps - attack); // 0..1 across the tail
+    const decay = Math.pow(1 - t, 1.7);
+    const roll = 0.68 + 0.32 * Math.sin(t * Math.PI * 3.4 + strike.pan * 2);
+    curve[i] = decay * roll * peak;
+  }
+
+  curve[steps - 1] = 0;
+  return curve;
 }
 
 /** 4 seconds of loopable noise, generated once and shared by every layer. */

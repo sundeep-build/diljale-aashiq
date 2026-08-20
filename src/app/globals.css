@@ -104,6 +104,47 @@
   100% { transform: translate3d(0, 2px, 0) scale(0.5); opacity: 0; }
 }
 
+/* ----------------------------------------------------------- bijli ------
+   Lightning, fired from lib/storm.ts for as long as the backdrop is watching.
+
+   Real lightning is not one flash. A strike is several return strokes down
+   the same channel a few tens of milliseconds apart, which is why it reads as
+   a stutter rather than a blink — `lightning-near` is that stutter, and it is
+   most of what sells the effect. Distant sheet lightning has the strokes
+   smeared together by the clouds in front of it, so `lightning-far` is a
+   single soft swell instead.
+
+   Both animate opacity only, so they composite like everything else in the
+   backdrop. See the performance rule at the top of backdrop.tsx. */
+@keyframes lightning-near {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  9% { opacity: 0.12; }
+  14% { opacity: 0.9; }
+  20% { opacity: 0.22; }
+  27% { opacity: 0.62; }
+  40% { opacity: 0.14; }
+  100% { opacity: 0; }
+}
+@keyframes lightning-far {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
+  38% { opacity: 0.55; }
+  62% { opacity: 0.62; }
+  100% { opacity: 0; }
+}
+/* the channel itself, alight only for the strokes — it must not linger after
+   the glow it caused, or it reads as a crack painted on the sky */
+@keyframes bolt {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  9% { opacity: 0.1; }
+  14% { opacity: 0.95; }
+  22% { opacity: 0.08; }
+  27% { opacity: 0.5; }
+  36%, 100% { opacity: 0; }
+}
+
 @keyframes flicker {
   0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
   20%, 24%, 55% { opacity: 0.35; }
@@ -274,16 +315,23 @@
     max-height: 100%;
   }
 
-  /* the grade is band-relative, so it lands on the photo's own bottom edge
-     whichever framing is up */
+  /* The grade is band-relative, so it lands on the photo's own bottom edge
+     whichever framing is up.
+
+     The last stop has to stay fully opaque in both framings: that stop IS the
+     seam where the photograph stops and the page underneath begins, and any
+     transparency there turns the crop into a visible hard line. Everything
+     before it is free, so the ramp starts later and climbs slower than it
+     used to — the stall now reads through the band the player sits in
+     instead of dissolving into black a third of the way up it. */
   .hero-grade {
     background: linear-gradient(
       to bottom,
       rgba(12, 9, 4, 0.3) 0%,
       rgba(12, 9, 4, 0.1) 7%,
       rgba(12, 9, 4, 0.1) 34%,
-      rgba(12, 9, 4, 0.36) 52%,
-      rgba(12, 9, 4, 0.84) 78%,
+      rgba(12, 9, 4, 0.3) 55%,
+      rgba(12, 9, 4, 0.7) 82%,
       var(--color-ink) 100%
     );
   }
@@ -296,16 +344,18 @@
 
     /* wider, the photo runs the full height of the hero: the top stop is the
        bed the sticky header sits on, and the bottom is the bed the player
-       card reads against */
+       card reads against. That bed used to be 0.88 black by 72% and all but
+       solid by 88%, which killed the bottom third of the photograph to light
+       text that the card carries on its own anyway. */
     .hero-grade {
       background: linear-gradient(
         to bottom,
         rgba(12, 9, 4, 0.72) 0%,
         rgba(12, 9, 4, 0.24) 14%,
         rgba(12, 9, 4, 0.14) 30%,
-        rgba(12, 9, 4, 0.56) 52%,
-        rgba(12, 9, 4, 0.88) 72%,
-        rgba(12, 9, 4, 0.98) 88%,
+        rgba(12, 9, 4, 0.34) 55%,
+        rgba(12, 9, 4, 0.62) 75%,
+        rgba(12, 9, 4, 0.86) 90%,
         var(--color-ink) 100%
       );
     }

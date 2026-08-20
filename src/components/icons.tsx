@@ -128,6 +128,12 @@ export const Rain = ({ className }: P) => (
   </svg>
 );
 
+export const Bolt = ({ className }: P) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+    <path d="M13.2 2 5 13.4h5.2L9.9 22l8.4-11.7h-5.4Z" />
+  </svg>
+);
+
 export const Cup = ({ className }: P) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
     strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>

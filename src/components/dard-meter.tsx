@@ -19,7 +19,7 @@ export function DardMeter() {
         <div className="grid gap-8 p-5 sm:p-10 md:grid-cols-[1.1fr_0.9fr]">
           {/* ---- the dial ---- */}
           <div>
-            <p className="section-label">Naya feature · Dard-o-Meter</p>
+            <p className="section-label">New feature · Dard-o-Meter</p>
             <h2 className="mt-3 font-display text-2xl leading-tight font-extrabold sm:text-4xl">
               Playlist mat chuno.
               <br />

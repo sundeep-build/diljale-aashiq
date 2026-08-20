@@ -163,8 +163,8 @@ export function TopBar() {
             }
             title={
               motion === "calm"
-                ? "Baarish band hai — battery bach rahi hai"
-                : "Baarish band karo, battery bachao"
+                ? "Baarish band hai"
+                : "Baarish band karo"
             }
             className={cx(
               "grid size-7 shrink-0 place-items-center rounded-full border transition sm:size-8",

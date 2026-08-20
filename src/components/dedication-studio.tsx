@@ -96,7 +96,7 @@ export function DedicationStudio() {
       className="relative z-10 page-w scroll-mt-20 py-10 sm:py-14"
     >
       <div className="mb-6 text-center">
-        <p className="section-label">Naya feature · Dil se dil tak</p>
+        <p className="section-label">New feature · Dil se dil tak</p>
         <h2 className="mt-3 font-display text-2xl font-extrabold sm:text-4xl">
           Ek Song, kisi ke <span className="text-rose">naam</span> kar do
         </h2>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Ambience, type LayerId } from "@/lib/ambience";
+import { useEffect, useState } from "react";
+import { ambience, type LayerId } from "@/lib/ambience";
+import { storm } from "@/lib/storm";
 import { cx } from "@/lib/utils";
-import { Cup, Fan, Rain, Train } from "./icons";
+import { Bolt, Cup, Fan, Rain, Train } from "./icons";
 
 const LAYERS: {
   id: LayerId;
@@ -12,8 +13,10 @@ const LAYERS: {
   hint: string;
   Icon: (p: { className?: string }) => React.ReactElement;
   tint: string;
+  /** this layer drives the storm as well as its own noise — see lib/storm.ts */
+  stormy?: boolean;
 }[] = [
-  { id: "baarish", name: "Baarish", deva: "बारिश", hint: "Chhat pe girti hui", Icon: Rain, tint: "#7fa8c9" },
+  { id: "baarish", name: "Baarish", deva: "बारिश", hint: "Chhat pe girti hui", Icon: Rain, tint: "#7fa8c9", stormy: true },
   { id: "tapri", name: "Chai Tapri", deva: "टपरी", hint: "Door se aati bakbak", Icon: Cup, tint: "#e0b574" },
   { id: "rail", name: "Raat ki Rail", deva: "रेल", hint: "Patri pe khatkhat", Icon: Train, tint: "#c2622c" },
   { id: "pankha", name: "Chhat ka Pankha", deva: "पंखा", hint: "Ghoomta hua, roz ki tarah", Icon: Fan, tint: "#84a389" },
@@ -31,7 +34,6 @@ const PRESETS: { name: string; deva: string; mix: Partial<Record<LayerId, number
  * synthesised audio, so it layers under the music without hosting a single file.
  */
 export function TapriMode() {
-  const engineRef = useRef<Ambience | null>(null);
   const [mix, setMix] = useState<Record<LayerId, number>>({
     baarish: 0,
     tapri: 0,
@@ -39,21 +41,32 @@ export function TapriMode() {
     pankha: 0,
   });
 
-  useEffect(() => {
-    const engine = new Ambience();
-    engineRef.current = engine;
-    return () => engine.dispose();
-  }, []);
+  // Baarish does not switch the lightning on — it rains on this page whether
+  // or not anyone is listening, so the storm runs from load either way. What
+  // the fader does is drag it closer: brighter, more often, and louder.
+  useEffect(() => storm.setLevel(mix.baarish), [mix.baarish]);
+
+  // Mute rather than dispose on the way out. The audio graph is shared with
+  // the storm now, and closing the context would leave the sky flashing in
+  // silence for the rest of the visit. The weather goes back to its resting
+  // level though — nothing is driving it any more.
+  useEffect(
+    () => () => {
+      ambience.mute();
+      storm.setLevel(0);
+    },
+    [],
+  );
 
   const setLayer = (id: LayerId, value: number) => {
     setMix((m) => ({ ...m, [id]: value }));
-    engineRef.current?.set(id, value);
+    ambience.set(id, value);
   };
 
   const applyPreset = (preset: Partial<Record<LayerId, number>>) => {
     const next = { baarish: 0, tapri: 0, rail: 0, pankha: 0, ...preset };
     setMix(next);
-    for (const layer of LAYERS) engineRef.current?.set(layer.id, next[layer.id]);
+    for (const layer of LAYERS) ambience.set(layer.id, next[layer.id]);
   };
 
   const anyOn = Object.values(mix).some((v) => v > 0);
@@ -66,7 +79,7 @@ export function TapriMode() {
       <div className="panel overflow-hidden rounded-3xl p-5 sm:p-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="section-label">Naya feature · Tapri Mode</p>
+            <p className="section-label">New feature · Tapri Mode</p>
             <h2 className="mt-3 font-display text-2xl font-extrabold sm:text-4xl">
               Song background me <span className="text-rose">apna mahaul</span> banao
             </h2>
@@ -77,7 +90,9 @@ export function TapriMode() {
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted">
               Baarish, tapri ki bakbak, guzarti rail, chhat ka pankha — sab
               browser mein hi banaye ja rahe hain. Koi audio file download nahi
-              hoti, bas thoda sa shor jo gaane ke neeche baj jata hai.
+              hoti, bas thoda sa shor jo gaane ke neeche baj jata hai. Bijli
+              toh peeche chamakti hi rehti hai — baarish tez karo, aur woh
+              tumhare sar pe aa jayegi.
             </p>
           </div>
 
@@ -107,7 +122,7 @@ export function TapriMode() {
 
         {/* faders */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {LAYERS.map(({ id, name, deva, hint, Icon, tint }) => {
+          {LAYERS.map(({ id, name, deva, hint, Icon, tint, stormy }) => {
             const value = mix[id];
             const on = value > 0;
             return (
@@ -139,7 +154,16 @@ export function TapriMode() {
                         {deva}
                       </span>
                     </p>
-                    <p className="truncate text-[11px] text-muted">{hint}</p>
+                    <p className="truncate text-[11px] text-muted">
+                      {stormy && on ? (
+                        <span className="text-[#9fc4e2]">
+                          <Bolt className="mr-1 inline size-3 align-[-1px]" />
+                          Bijli aur paas aayegi
+                        </span>
+                      ) : (
+                        hint
+                      )}
+                    </p>
                   </div>
 
                   <span className="w-8 shrink-0 text-right text-[11px] tabular-nums text-muted">

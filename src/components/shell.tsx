@@ -3,6 +3,7 @@
 import type { Track } from "@/data/tracks";
 import { RadioProvider } from "./radio-provider";
 import { Backdrop } from "./backdrop";
+import { Lightning } from "./lightning";
 import { TopBar } from "./top-bar";
 import { RadioBar } from "./radio-bar";
 
@@ -22,6 +23,12 @@ export function Shell({
   return (
     <RadioProvider initialTrack={initialTrack}>
       <Backdrop />
+      {/* Bijli sits OVER the page, not inside the backdrop, because the hero
+          photograph covers the whole first screen — lightning behind it would
+          be invisible exactly where the storm should be most obvious. Above
+          the content, below the two control bars, so the street lights up
+          without the player becoming unreadable. See lightning.tsx. */}
+      <Lightning />
       <TopBar />
       {/* The bar lives at the END of <main> on purpose. `position: sticky`
           pins it to the viewport bottom while main scrolls, then lets it come

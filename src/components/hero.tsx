@@ -425,9 +425,12 @@ function ShopFront() {
           aria-hidden
           className="absolute inset-0 bg-[radial-gradient(55%_30%_at_50%_6%,color-mix(in_oklab,var(--color-amber)_9%,transparent),transparent_72%)]"
         />
+        {/* Vignette, on top of the grade. It was reaching 0.72 at the corners,
+        which is most of why the bottom of the frame went flat — the grade is
+        already dark down there and the two were stacking. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_30%,transparent_35%,rgba(12,9,4,0.72)_100%)]"
+          className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_30%,transparent_42%,rgba(12,9,4,0.52)_100%)]"
         />
       </div>
 
