@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { PromptsHeader } from "@/components/prompts/prompts-header";
 import { PromptsFooter } from "@/components/prompts/prompts-footer";
+import { NowPlaying } from "@/components/prompts/now-playing";
 import { ADSENSE_CLIENT } from "@/lib/ads";
 import "./studio.css";
 
@@ -27,6 +28,9 @@ export const viewport: Viewport = { themeColor: "#09090b" };
  * Every page under /prompts. Loads the studio theme and, when a publisher ID
  * is set, Google's AdSense script in Auto ads mode — Google places the ads
  * itself, so no page carries an ad slot. The radio pages never load either.
+ *
+ * The radio itself comes from the (station) layout above this one, so a song
+ * started on the home page keeps playing here; NowPlaying is its remote.
  */
 export default function PromptsLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -46,6 +50,7 @@ export default function PromptsLayout({ children }: { children: React.ReactNode 
       <PromptsHeader />
       <main className="flex-1">{children}</main>
       <PromptsFooter />
+      <NowPlaying />
     </div>
   );
 }

@@ -10,10 +10,13 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { usePathname } from "next/navigation";
 import { TRACKS, type RotationSlug, type Track } from "@/data/tracks";
 import {
   FATAL_YT_ERRORS,
   loadYouTubeApi,
+  PLAYER_BOX,
+  PLAYER_VISIBLE,
   playerVars,
   YT_STATE,
   type YTPlayer,
@@ -138,6 +141,14 @@ const WAKE_EVENTS = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
  */
 const BOOT_CEILING_MS = 2000;
 
+/**
+ * Pages with no play button of their own. Someone who lands on one of these
+ * gets no YouTube download at all — the player boots only if they move on to
+ * a page that has a transport. Someone who arrives with the radio already
+ * playing keeps it: the provider, and the player in it, outlive the navigation.
+ */
+const isQuietPage = (pathname: string) => pathname.startsWith("/prompts");
+
 export function RadioProvider({
   children,
   initialTrack,
@@ -194,6 +205,13 @@ export function RadioProvider({
     rotations: [],
     peakDard: 0,
   });
+
+  const pathname = usePathname();
+  const quiet = isQuietPage(pathname);
+  /** whether the visit began on a quiet page — decides how the player boots */
+  const landedQuietRef = useRef(quiet);
+  /** the boot routine, for booting from outside the effect that owns it */
+  const bootRef = useRef<(() => void) | null>(null);
 
   const playerRef = useRef<YTPlayer | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -281,8 +299,9 @@ export function RadioProvider({
       teardownTriggers();
       build();
     };
+    bootRef.current = boot;
 
-    const ceiling = window.setTimeout(boot, BOOT_CEILING_MS);
+    let ceiling = 0;
 
     const teardownTriggers = () => {
       cancelIdle?.();
@@ -299,11 +318,16 @@ export function RadioProvider({
       cancelIdle = whenIdle(boot, 1000);
     };
 
-    for (const type of WAKE_EVENTS) {
-      window.addEventListener(type, boot, { capture: true, passive: true });
+    // landed on a page without a transport: wait for the effect below to
+    // call boot() when the visitor reaches one — no triggers, no ceiling
+    if (!landedQuietRef.current) {
+      ceiling = window.setTimeout(boot, BOOT_CEILING_MS);
+      for (const type of WAKE_EVENTS) {
+        window.addEventListener(type, boot, { capture: true, passive: true });
+      }
+      if (document.readyState === "complete") onLoad();
+      else window.addEventListener("load", onLoad);
     }
-    if (document.readyState === "complete") onLoad();
-    else window.addEventListener("load", onLoad);
 
     function build() {
       loadYouTubeApi()
@@ -376,6 +400,13 @@ export function RadioProvider({
     // only the very first video matters for construction
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* A visit that began on a quiet page boots the player on the way out of it.
+     That move is a click, so the station is warming up by the time anyone
+     can reach for play. boot() is idempotent. */
+  useEffect(() => {
+    if (!quiet && landedQuietRef.current) bootRef.current?.();
+  }, [quiet]);
 
   /* ---------------- react to track changes ---------------- */
 
@@ -710,7 +741,15 @@ export function RadioProvider({
 
   return (
     <RadioContext.Provider value={value}>
-      <ProgressContext.Provider value={progress}>{children}</ProgressContext.Provider>
+      <ProgressContext.Provider value={progress}>
+        {children}
+        {/* The hidden player lives here, beside the pages rather than inside
+            one, so it survives every navigation the provider does — which is
+            what keeps the music going from the radio into /prompts and back.
+            A visible player has to sit in the page's layout instead; the hero
+            and the dedication card render it themselves in that mode. */}
+        {!PLAYER_VISIBLE && <div ref={attachHost} className={PLAYER_BOX} aria-hidden />}
+      </ProgressContext.Provider>
     </RadioContext.Provider>
   );
 }

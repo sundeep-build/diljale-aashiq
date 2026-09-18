@@ -1,4 +1,4 @@
-import { Shell } from "@/components/shell";
+import { StationFrame } from "@/components/shell";
 import { Hero } from "@/components/hero";
 import { DardMeter } from "@/components/dard-meter";
 import { Rotations } from "@/components/rotations";
@@ -12,7 +12,7 @@ import { Footer } from "@/components/footer";
 export default function Home() {
   return (
     <>
-      <Shell>
+      <StationFrame>
         <Hero />
         <DardMeter />
         <Rotations />
@@ -21,7 +21,7 @@ export default function Home() {
         <DedicationStudio />
         <Poster />
         <Install />
-      </Shell>
+      </StationFrame>
       <Footer />
     </>
   );

@@ -4,7 +4,7 @@ import { useRadio, useRadioProgress } from "./radio-provider";
 import { fmtTime } from "@/lib/utils";
 import { Pause, Play, YouTubeMusic } from "./icons";
 import { PLAYLIST_URL } from "@/data/tracks";
-import { PLAYER_BOX } from "@/lib/youtube-embed";
+import { PLAYER_BOX, PLAYER_VISIBLE } from "@/lib/youtube-embed";
 
 /** The player that sits under a shared dedication. */
 export function DedicationPlayer({ accent }: { accent: string }) {
@@ -70,7 +70,8 @@ export function DedicationPlayer({ accent }: { accent: string }) {
             Playlist →
           </a>
         </div>
-        <div ref={attachHost} className={PLAYER_BOX} />
+        {/* hidden mode: the provider hosts the player, so it outlives this page */}
+        {PLAYER_VISIBLE && <div ref={attachHost} className={PLAYER_BOX} />}
         {failed && (
           <p className="mt-2 text-[10px] text-rose-soft">
             Player load nahi hua — ad-blocker band karke refresh karo.

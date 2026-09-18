@@ -8,20 +8,20 @@ import { TopBar } from "./top-bar";
 import { RadioBar } from "./radio-bar";
 
 /**
- * Everything that needs the radio lives inside here. Pages mount their own
- * shell so a dedication page can boot the station on its own song.
+ * The station's chrome — weather, header, sticky player — around a page.
+ * Needs a RadioProvider above it but does not bring one: the home page gets
+ * its provider from app/(station)/layout.tsx, which keeps the same radio
+ * playing across /prompts and back.
  */
-export function Shell({
+export function StationFrame({
   children,
-  initialTrack,
   withBar = true,
 }: {
   children: React.ReactNode;
-  initialTrack?: Track;
   withBar?: boolean;
 }) {
   return (
-    <RadioProvider initialTrack={initialTrack}>
+    <>
       <Backdrop />
       {/* Bijli sits OVER the page, not inside the backdrop, because the hero
           photograph covers the whole first screen — lightning behind it would
@@ -38,6 +38,26 @@ export function Shell({
         {children}
         {withBar && <RadioBar />}
       </main>
+    </>
+  );
+}
+
+/**
+ * A self-contained station: its own radio plus the chrome. For pages outside
+ * the (station) group — a dedication boots the station on its own song.
+ */
+export function Shell({
+  children,
+  initialTrack,
+  withBar = true,
+}: {
+  children: React.ReactNode;
+  initialTrack?: Track;
+  withBar?: boolean;
+}) {
+  return (
+    <RadioProvider initialTrack={initialTrack}>
+      <StationFrame withBar={withBar}>{children}</StationFrame>
     </RadioProvider>
   );
 }

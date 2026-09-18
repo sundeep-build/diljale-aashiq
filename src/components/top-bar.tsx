@@ -116,13 +116,13 @@ export function TopBar() {
             min-w-0 lets the row shrink instead of widening the header. */}
         <nav className="hide-scrollbar -mx-1 hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 md:flex">
           {NAV.map((item) => (
-            <a
+            <NavItem
               key={item.href}
               href={item.href}
               className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-muted transition-colors hover:bg-cream/8 hover:text-cream sm:px-3"
             >
               {item.label}
-            </a>
+            </NavItem>
           ))}
         </nav>
 
@@ -227,13 +227,13 @@ export function TopBar() {
           <ul className="page-w flex flex-col py-2">
             {NAV.map((item) => (
               <li key={item.href}>
-                <a
+                <NavItem
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
                   className="block rounded-xl px-3 py-3 text-sm font-medium text-cream/85 transition-colors hover:bg-cream/8 hover:text-cream"
                 >
                   {item.label}
-                </a>
+                </NavItem>
               </li>
             ))}
             <li className="mt-1 border-t border-cream/10 pt-2">
@@ -250,4 +250,16 @@ export function TopBar() {
       )}
     </header>
   );
+}
+
+/**
+ * In-page anchors stay plain <a> (Link adds nothing to a hash jump), but a
+ * route has to be a <Link>: a plain <a> to /prompts is a full page load,
+ * which tears down the radio and stops the song mid-line.
+ */
+function NavItem({
+  href,
+  ...props
+}: { href: string } & Omit<React.ComponentProps<"a">, "href">) {
+  return href.startsWith("/") ? <Link href={href} {...props} /> : <a href={href} {...props} />;
 }

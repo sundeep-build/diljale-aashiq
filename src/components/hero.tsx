@@ -6,7 +6,7 @@ import { useStationLine } from "./use-station-line";
 import { liftedAccent, ROTATION_BY_SLUG } from "@/data/rotations";
 import { PLAYLIST_URL, TRACKS } from "@/data/tracks";
 import { cx, fmtTime } from "@/lib/utils";
-import { PLAYER_BOX } from "@/lib/youtube-embed";
+import { PLAYER_BOX, PLAYER_VISIBLE } from "@/lib/youtube-embed";
 import { Curtain } from "./backdrop";
 import { Next, Pause, Play, Prev, Shuffle, YouTubeMusic } from "./icons";
 
@@ -290,7 +290,8 @@ export function Hero() {
           {/* YouTube replaces a child of this box with its iframe. See
             PLAYER_VISIBLE in lib/youtube-embed.ts — hidden here, so the
             station reads as a radio instead of a video embed. */}
-          <div ref={attachHost} className={PLAYER_BOX} />
+          {/* hidden mode: the provider hosts the player, so it outlives this page */}
+          {PLAYER_VISIBLE && <div ref={attachHost} className={PLAYER_BOX} />}
 
           {failed && (
             <p className="mt-2 text-center text-[10px] leading-relaxed text-rose-soft">
