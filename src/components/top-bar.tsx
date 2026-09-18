@@ -16,6 +16,7 @@ const NAV = [
   { href: "#songs", label: "Songs" },
   { href: "#tapri", label: "Tapri Mode" },
   { href: "#dedicate", label: "Dedicate" },
+  { href: "/prompts", label: "AI Prompts" },
 ];
 
 export function TopBar() {

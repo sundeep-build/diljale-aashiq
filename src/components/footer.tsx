@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PLAYLIST_URL, TRACKS } from "@/data/tracks";
 import { CONTACT_EMAIL } from "@/lib/site";
 import { BrokenHeart, Heart } from "./icons";
@@ -66,6 +67,7 @@ export function Footer() {
               <li><a href="#rotations" className="hover:text-cream">All rotations</a></li>
               <li><a href="#tapri" className="hover:text-cream">Tapri Mode</a></li>
               <li><a href="#dedicate" className="hover:text-cream">Make a dedication</a></li>
+              <li><Link href="/prompts" className="hover:text-cream">AI image &amp; video prompts</Link></li>
               <li>
                 <a
                   href={PLAYLIST_URL}

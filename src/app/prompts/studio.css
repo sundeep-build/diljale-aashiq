@@ -1,0 +1,115 @@
+/* ------------------------------------------------------------ studio --
+   The /prompts theme. Imported by app/prompts/layout.tsx only, so Next ships
+   this file to prompt pages and never to the radio.
+
+   Performance rule, same as the station's backdrop: nothing in here animates
+   continuously, nothing uses filter: blur or backdrop-filter over large
+   areas, and every "glow" is a static gradient. The page paints once and is
+   done. Hover effects touch only border-color, box-shadow and transform. */
+
+/* The radio's film grain and CRT scanlines are fixed full-viewport layers on
+   <body>. Wrong look here, and a full-screen paint for nothing. */
+body:has(.studio)::after,
+body:has(.studio)::before {
+  display: none;
+}
+body:has(.studio) {
+  background: #09090b;
+}
+html:has(.studio) {
+  background: #09090b;
+  /* no sticky player on these pages to keep clear of */
+  scroll-padding-bottom: 0;
+  scroll-padding-top: 5rem;
+}
+
+.studio {
+  color: #e4e4e7;
+  isolation: isolate;
+}
+
+.studio ::selection {
+  background: #8b5cf6;
+  color: #fff;
+}
+
+/* The aurora at the top of every page: three soft radial washes. Positioned
+   absolutely in the first screen only — not fixed — so scrolling never
+   repaints it. */
+.studio-aurora {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 38rem;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38rem 20rem at 18% -4%, rgb(139 92 246 / 0.28), transparent 70%),
+    radial-gradient(34rem 18rem at 62% -8%, rgb(236 72 153 / 0.2), transparent 70%),
+    radial-gradient(30rem 16rem at 92% 4%, rgb(245 158 11 / 0.12), transparent 70%);
+}
+
+/* The faint engineering grid under the aurora, fading out downwards. */
+.studio-grid {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 34rem;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+
+.text-gradient {
+  background: linear-gradient(95deg, #c4b5fd 0%, #f0abfc 45%, #fcd34d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Frosted-looking card without the frost: a translucent fill over a dark
+   page reads the same as a blur and costs nothing per frame. */
+.glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.015));
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+/* A 1px gradient border, drawn with two backgrounds instead of a pseudo
+   element or an image. */
+.ring-gradient {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#111114, #111114) padding-box,
+    linear-gradient(120deg, rgb(167 139 250 / 0.7), rgb(240 171 252 / 0.45), rgb(252 211 77 / 0.5))
+      border-box;
+}
+
+.lift {
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  border-color: rgb(167 139 250 / 0.4);
+  box-shadow: 0 18px 40px -22px rgb(139 92 246 / 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .lift:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* The code-editor frame the prompt sits in. */
+.editor {
+  background: #0d0d10;
+  border: 1px solid rgb(255 255 255 / 0.09);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.4),
+    0 30px 60px -30px rgb(139 92 246 / 0.35);
+}

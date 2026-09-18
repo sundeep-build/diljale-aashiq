@@ -6,6 +6,8 @@ import {
   Kalam,
   Noto_Serif_Devanagari,
 } from "next/font/google";
+import { SITE_URL } from "@/lib/site";
+import { ADSENSE_CLIENT } from "@/lib/ads";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -50,14 +52,8 @@ const deva = Noto_Serif_Devanagari({
   preload: false,
 });
 
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Diljale Aashiq — 24×7 dard ka radio",
     template: "%s · Diljale Aashiq",
@@ -78,6 +74,10 @@ export const metadata: Metadata = {
       "Playlist mat chuno, dard chuno. Ek non-stop heartbreak radio station.",
   },
   twitter: { card: "summary_large_image" },
+  /* AdSense's site-ownership check. A meta tag, not the ad script: Google
+     verifies against the home page, but the radio itself stays ad-free —
+     ads only load under /prompts (see app/prompts/layout.tsx). */
+  ...(ADSENSE_CLIENT && { other: { "google-adsense-account": ADSENSE_CLIENT } }),
   appleWebApp: {
     capable: true,
     title: "Diljale Aashiq",
